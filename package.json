@@ -1,0 +1,52 @@
+{
+  "name": "adblock",
+  "type": "module",
+  "version": "0.1.0",
+  "description": "A polished STX-powered Chrome MV3 ad blocker.",
+  "author": "Chris Breuer <chris@stacksjs.org>",
+  "license": "MIT",
+  "homepage": "https://github.com/chrisbbreuer/adblock#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisbbreuer/adblock.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chrisbbreuer/adblock/issues"
+  },
+  "keywords": [
+    "adblock",
+    "chrome-extension",
+    "manifest-v3",
+    "stx",
+    "bun"
+  ],
+  "scripts": {
+    "build": "bun --bun scripts/build-extension.ts",
+    "package": "bun run build && bun --bun scripts/package-extension.ts",
+    "validate:rules": "bun --bun scripts/validate-rules.ts",
+    "test": "bun test",
+    "lint": "bunx --bun pickier . --config .config/pickier.ts",
+    "lint:fix": "bunx --bun pickier . --fix --config .config/pickier.ts",
+    "typecheck": "bun --bun tsc --noEmit",
+    "format": "bunx --bun pickier . --format --config .config/pickier.ts",
+    "format:fix": "bunx --bun pickier . --format --write --config .config/pickier.ts",
+    "fresh": "bunx rimraf node_modules/ bun.lock && bun i"
+  },
+  "dependencies": {
+    "bun-plugin-stx": "^0.2.72"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.4",
+    "better-dx": "^0.2.15",
+    "typescript": "^5.9.3"
+  },
+  "git-hooks": {
+    "pre-commit": {
+      "staged-lint": {
+        "*.{js,ts,json,yaml,yml,md}": "bunx --bun pickier lint --fix"
+      },
+      "autoRestage": true
+    },
+    "commit-msg": "bunx gitlint --edit .git/COMMIT_EDITMSG"
+  }
+}

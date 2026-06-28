@@ -1,0 +1,15 @@
+.cache
+.stx
+.DS_Store
+.idea
+*.log
+*.tgz
+*.zip
+coverage
+dist
+lib-cov
+logs
+node_modules
+temp
+.zed
+.cursor

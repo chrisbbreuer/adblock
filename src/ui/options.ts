@@ -1,0 +1,136 @@
+import { normalizeHostname } from '../shared/domain'
+import { formatBytes, formatMinutes } from '../shared/metrics'
+import type { DashboardState } from '../shared/types'
+import { byId, downloadJson, renderBars, sendMessage } from './dom'
+
+const elements = {
+  blocked: byId('dashboard-blocked'),
+  data: byId('dashboard-data'),
+  video: byId('dashboard-video'),
+  version: byId('dashboard-version'),
+  dailyChart: byId('daily-chart'),
+  enabled: byId<HTMLInputElement>('setting-enabled'),
+  cosmetic: byId<HTMLInputElement>('setting-cosmetic'),
+  youtube: byId<HTMLInputElement>('setting-youtube'),
+  x: byId<HTMLInputElement>('setting-x'),
+  badge: byId<HTMLInputElement>('setting-badge'),
+  allowedCount: byId('allowed-count'),
+  allowForm: byId<HTMLFormElement>('allow-form'),
+  allowHost: byId<HTMLInputElement>('allow-host'),
+  allowedSites: byId('allowed-sites'),
+  diagnostics: byId('diagnostics'),
+  status: byId('options-status'),
+  exportData: byId<HTMLButtonElement>('export-data'),
+  resetStats: byId<HTMLButtonElement>('reset-stats'),
+}
+
+let state: DashboardState | undefined
+
+void refresh()
+
+for (const [key, input] of Object.entries({
+  enabled: elements.enabled,
+  cosmeticFiltering: elements.cosmetic,
+  youtubeEnhancements: elements.youtube,
+  xEnhancements: elements.x,
+  badgeEnabled: elements.badge,
+})) {
+  input.addEventListener('change', async () => {
+    state = await sendMessage<DashboardState>({ type: 'set-settings', settings: { [key]: input.checked } })
+    render(state)
+  })
+}
+
+elements.allowForm.addEventListener('submit', async (event) => {
+  event.preventDefault()
+  if (!state) return
+  const hostname = normalizeHostname(elements.allowHost.value)
+  if (!hostname) return
+  const allowedSites = [...new Set([...state.settings.allowedSites, hostname])]
+  state = await sendMessage<DashboardState>({ type: 'set-settings', settings: { allowedSites } })
+  elements.allowHost.value = ''
+  render(state)
+})
+
+elements.exportData.addEventListener('click', async () => {
+  const data = await sendMessage<DashboardState>({ type: 'export-data' })
+  downloadJson(`adblock-export-${new Date().toISOString().slice(0, 10)}.json`, data)
+})
+
+elements.resetStats.addEventListener('click', async () => {
+  state = await sendMessage<DashboardState>({ type: 'reset-stats' })
+  render(state)
+})
+
+async function refresh(): Promise<void> {
+  try {
+    state = await sendMessage<DashboardState>({ type: 'get-dashboard' })
+    render(state)
+  }
+  catch (error) {
+    elements.status.textContent = error instanceof Error ? error.message : String(error)
+  }
+}
+
+function render(next: DashboardState): void {
+  elements.blocked.textContent = next.lifetime.adsBlocked.toLocaleString()
+  elements.data.textContent = formatBytes(next.lifetime.bytesSaved)
+  elements.video.textContent = formatMinutes(next.lifetime.videoSecondsSaved)
+  elements.version.textContent = next.manifestVersion
+  elements.enabled.checked = next.settings.enabled
+  elements.cosmetic.checked = next.settings.cosmeticFiltering
+  elements.youtube.checked = next.settings.youtubeEnhancements
+  elements.x.checked = next.settings.xEnhancements
+  elements.badge.checked = next.settings.badgeEnabled
+  elements.allowedCount.textContent = String(next.settings.allowedSites.length)
+  elements.status.textContent = 'Dashboard data is stored locally with compact settings synced by Chrome.'
+
+  renderBars(elements.dailyChart, next.local.daily.map(bucket => bucket.adsBlocked), 60)
+  renderAllowedSites(next)
+  renderDiagnostics(next)
+}
+
+function renderAllowedSites(next: DashboardState): void {
+  if (!next.settings.allowedSites.length) {
+    elements.allowedSites.replaceChildren(pill('No allowed sites'))
+    return
+  }
+
+  elements.allowedSites.replaceChildren(
+    ...next.settings.allowedSites.map((hostname) => {
+      const button = pill(hostname)
+      button.addEventListener('click', async () => {
+        const allowedSites = next.settings.allowedSites.filter(site => site !== hostname)
+        state = await sendMessage<DashboardState>({ type: 'set-settings', settings: { allowedSites } })
+        render(state)
+      })
+      return button
+    }),
+  )
+}
+
+function renderDiagnostics(next: DashboardState): void {
+  const rows = [
+    ['Hourly buckets', next.local.hourly.length],
+    ['Daily buckets', next.local.daily.length],
+    ['Tracked sites', Object.keys(next.local.sites).length],
+    ['Recent events', next.local.recentEvents.length],
+  ]
+
+  elements.diagnostics.replaceChildren(
+    ...rows.map(([label, value]) => {
+      const row = document.createElement('div')
+      row.className = 'diagnostic-row'
+      row.innerHTML = `<span>${label}</span><strong>${value}</strong>`
+      return row
+    }),
+  )
+}
+
+function pill(text: string): HTMLButtonElement {
+  const button = document.createElement('button')
+  button.className = 'pill'
+  button.type = 'button'
+  button.textContent = text
+  return button
+}

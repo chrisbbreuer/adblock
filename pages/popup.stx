@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adblock</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="popup-shell">
+    <main class="popup-frame glass-panel" data-view="loading">
+      <section class="popup-hero">
+        <div>
+          <p class="eyebrow">Adblock</p>
+          <h1 id="site-title">Protection active</h1>
+        </div>
+        <button id="protection-toggle" class="power-button" type="button" aria-label="Toggle protection">
+          <span></span>
+        </button>
+      </section>
+
+      <section class="stat-grid" aria-label="Adblock statistics">
+        <article class="metric-card primary">
+          <span>Blocked</span>
+          <strong id="today-blocked">0</strong>
+          <small>today</small>
+        </article>
+        <article class="metric-card">
+          <span>Data saved</span>
+          <strong id="data-saved">0 KB</strong>
+          <small>estimated</small>
+        </article>
+        <article class="metric-card">
+          <span>Video time</span>
+          <strong id="video-time">0 min</strong>
+          <small>estimated</small>
+        </article>
+      </section>
+
+      <section class="timeline-card">
+        <div class="section-heading">
+          <span>Last 24 hours</span>
+          <strong id="lifetime-blocked">0 lifetime</strong>
+        </div>
+        <div id="hourly-chart" class="bar-chart" aria-hidden="true"></div>
+      </section>
+
+      <section class="site-card">
+        <div>
+          <span class="muted">Current site</span>
+          <strong id="current-site">No active tab</strong>
+        </div>
+        <button id="site-toggle" class="soft-button" type="button">Allow</button>
+      </section>
+
+      <section class="category-list" aria-label="Top blocked sites">
+        <div class="section-heading">
+          <span>Top sites</span>
+          <button id="open-options" class="icon-button" type="button" aria-label="Open dashboard">↗</button>
+        </div>
+        <div id="top-sites"></div>
+      </section>
+
+      <p id="status-message" class="status-message" role="status">Loading protection state...</p>
+    </main>
+    <script type="module" src="/popup.js"></script>
+  </body>
+</html>

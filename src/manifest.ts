@@ -1,0 +1,50 @@
+import { extensionDescription, extensionName, staticRulesetId } from './shared/constants'
+
+export interface ManifestInput {
+  version: string
+}
+
+export function buildManifest(input: ManifestInput): chrome.runtime.ManifestV3 {
+  return {
+    manifest_version: 3,
+    name: extensionName,
+    description: extensionDescription,
+    version: input.version,
+    action: {
+      default_title: extensionName,
+      default_popup: 'popup.html',
+    },
+    options_page: 'options.html',
+    background: {
+      service_worker: 'background.js',
+      type: 'module',
+    },
+    permissions: ['declarativeNetRequest', 'storage', 'tabs', 'scripting'],
+    host_permissions: ['http://*/*', 'https://*/*'],
+    icons: {
+      16: 'icons/icon.svg',
+      32: 'icons/icon.svg',
+      48: 'icons/icon.svg',
+      128: 'icons/icon.svg',
+    },
+    content_scripts: [
+      {
+        matches: ['http://*/*', 'https://*/*'],
+        js: ['content.js'],
+        run_at: 'document_idle',
+      },
+    ],
+    declarative_net_request: {
+      rule_resources: [
+        {
+          id: staticRulesetId,
+          enabled: true,
+          path: 'rules/static.json',
+        },
+      ],
+    },
+    content_security_policy: {
+      extension_pages: `script-src 'self'; object-src 'self'`,
+    },
+  }
+}

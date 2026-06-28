@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adblock Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="dashboard-shell">
+    <main class="dashboard-layout">
+      <header class="dashboard-header">
+        <div>
+          <p class="eyebrow">Adblock</p>
+          <h1>Protection dashboard</h1>
+        </div>
+        <div class="header-actions">
+          <button id="export-data" class="soft-button" type="button">Export</button>
+          <button id="reset-stats" class="danger-button" type="button">Reset</button>
+        </div>
+      </header>
+
+      <section class="dashboard-metrics">
+        <article class="metric-card primary">
+          <span>Lifetime blocked</span>
+          <strong id="dashboard-blocked">0</strong>
+          <small>requests and placements</small>
+        </article>
+        <article class="metric-card">
+          <span>Data saved</span>
+          <strong id="dashboard-data">0 KB</strong>
+          <small>estimated</small>
+        </article>
+        <article class="metric-card">
+          <span>Video time</span>
+          <strong id="dashboard-video">0 min</strong>
+          <small>estimated</small>
+        </article>
+        <article class="metric-card">
+          <span>Version</span>
+          <strong id="dashboard-version">0.0.0</strong>
+          <small>local build</small>
+        </article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>History</span>
+            <strong>60 days</strong>
+          </div>
+          <div id="daily-chart" class="bar-chart large" aria-hidden="true"></div>
+        </article>
+
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>Protection</span>
+            <strong id="rules-status">Static + dynamic</strong>
+          </div>
+          <label class="toggle-row">
+            <span>Global protection</span>
+            <input id="setting-enabled" type="checkbox">
+          </label>
+          <label class="toggle-row">
+            <span>Cosmetic filtering</span>
+            <input id="setting-cosmetic" type="checkbox">
+          </label>
+          <label class="toggle-row">
+            <span>YouTube cleanup</span>
+            <input id="setting-youtube" type="checkbox">
+          </label>
+          <label class="toggle-row">
+            <span>X/Twitter cleanup</span>
+            <input id="setting-x" type="checkbox">
+          </label>
+          <label class="toggle-row">
+            <span>Badge count</span>
+            <input id="setting-badge" type="checkbox">
+          </label>
+        </article>
+
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>Allowed sites</span>
+            <strong id="allowed-count">0</strong>
+          </div>
+          <form id="allow-form" class="site-form">
+            <input id="allow-host" type="text" placeholder="example.com" autocomplete="off">
+            <button class="soft-button" type="submit">Add</button>
+          </form>
+          <div id="allowed-sites" class="pill-list"></div>
+        </article>
+
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>Diagnostics</span>
+            <strong>Local only</strong>
+          </div>
+          <div id="diagnostics" class="diagnostics"></div>
+        </article>
+      </section>
+
+      <p id="options-status" class="status-message" role="status">Loading dashboard...</p>
+    </main>
+    <script type="module" src="/options.js"></script>
+  </body>
+</html>
