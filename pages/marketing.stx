@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adblock is a polished STX-powered Chrome MV3 extension built to remove intrusive ads, popups, promoted posts, and video ad interruptions immediately.">
+    <title>Adblock - Immediate, Local Ad Protection</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body class="marketing-shell">
+    <header class="marketing-nav" aria-label="Primary navigation">
+      <a class="brand-lockup" href="#top" aria-label="Adblock home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>Adblock</span>
+      </a>
+      <nav>
+        <a href="#features">Features</a>
+        <a href="#stats">Stats</a>
+        <a href="#privacy">Privacy</a>
+      </nav>
+      <a class="nav-action" href="options.html">Open dashboard</a>
+    </header>
+
+    <main id="top">
+      <section class="marketing-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Chrome MV3 · STX · Local-first</p>
+          <h1>Adblock</h1>
+          <p class="hero-lede">
+            Built because waiting for the next popup fix is the wrong deal. Adblock blocks intrusive ads,
+            promoted noise, and video interruptions before they get a chance to take over the page.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-link" href="options.html">View dashboard</a>
+            <a class="secondary-link" href="#features">See protection</a>
+          </div>
+        </div>
+
+        <div class="hero-product" aria-label="Adblock product preview">
+          <div class="browser-preview">
+            <div class="browser-bar">
+              <span></span>
+              <span></span>
+              <span></span>
+              <strong>youtube.com/watch</strong>
+            </div>
+            <div class="watch-preview">
+              <div class="video-surface">
+                <div class="skip-badge">Video ad skipped · 0:27 saved</div>
+                <div class="play-ring"></div>
+              </div>
+              <div class="feed-lines">
+                <span class="line wide"></span>
+                <span class="line"></span>
+                <span class="line short"></span>
+                <span class="blocked-chip">3 sponsored placements removed</span>
+              </div>
+            </div>
+          </div>
+
+          <aside class="hero-popup-preview">
+            <div class="preview-topline">
+              <span>Protection active</span>
+              <strong>98%</strong>
+            </div>
+            <div class="preview-stats">
+              <div>
+                <strong>1,248</strong>
+                <span>blocked today</span>
+              </div>
+              <div>
+                <strong>312 MB</strong>
+                <span>data saved</span>
+              </div>
+              <div>
+                <strong>41 min</strong>
+                <span>video time</span>
+              </div>
+            </div>
+            <div class="mini-bars" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section id="features" class="marketing-band">
+        <div class="section-kicker">
+          <p class="eyebrow">Coverage</p>
+          <h2>Blocks the interruptions people actually feel.</h2>
+        </div>
+        <div class="feature-grid">
+          <article>
+            <span class="feature-icon network" aria-hidden="true"></span>
+            <h3>Network blocking</h3>
+            <p>Manifest V3 declarative rules stop known ad, tracker, popup, and annoyance hosts before requests complete.</p>
+          </article>
+          <article>
+            <span class="feature-icon video" aria-hidden="true"></span>
+            <h3>YouTube cleanup</h3>
+            <p>Removes sponsored placements, detects video ad states, and clicks available skip controls with performance guardrails.</p>
+          </article>
+          <article>
+            <span class="feature-icon social" aria-hidden="true"></span>
+            <h3>X/Twitter cleanup</h3>
+            <p>Cleans promoted feed entries and timeline clutter while keeping normal posts, search, profiles, and navigation usable.</p>
+          </article>
+          <article>
+            <span class="feature-icon control" aria-hidden="true"></span>
+            <h3>One-click control</h3>
+            <p>Pause protection per site, manage allowlists, and inspect diagnostics from a polished popup and full dashboard.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="stats" class="stats-showcase">
+        <div>
+          <p class="eyebrow">Receipts</p>
+          <h2>Local stats make blocking visible over time.</h2>
+          <p>
+            Adblock tracks lifetime ads blocked, daily history, estimated bandwidth saved, and estimated video minutes recovered.
+            Sync-backed totals can follow a user into a new install while detailed histories stay local.
+          </p>
+        </div>
+        <div class="stat-wall" aria-label="Adblock stats examples">
+          <article>
+            <strong>52,910</strong>
+            <span>lifetime blocks</span>
+          </article>
+          <article>
+            <strong>8.4 GB</strong>
+            <span>estimated data saved</span>
+          </article>
+          <article>
+            <strong>19.6 hr</strong>
+            <span>estimated video time saved</span>
+          </article>
+          <article>
+            <strong>0</strong>
+            <span>remote telemetry events</span>
+          </article>
+        </div>
+      </section>
+
+      <section id="privacy" class="privacy-band">
+        <div class="privacy-copy">
+          <p class="eyebrow">Privacy</p>
+          <h2>No hidden telemetry. No remote rule surprises.</h2>
+          <p>
+            Rules ship with releases, user site choices become local dynamic rules, and the dashboard clearly marks estimates.
+            The point is simple: remove the obstruction immediately and keep the user in control.
+          </p>
+        </div>
+        <div class="privacy-list">
+          <div><span></span>Chrome MV3 declarativeNetRequest</div>
+          <div><span></span>Local and sync storage split</div>
+          <div><span></span>Exportable stats and reset controls</div>
+          <div><span></span>Static STX markup with extension-safe scripts</div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="marketing-footer">
+      <span>Adblock</span>
+      <a href="options.html">Dashboard</a>
+      <a href="popup.html">Popup preview</a>
+    </footer>
+  </body>
+</html>

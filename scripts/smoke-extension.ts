@@ -140,6 +140,17 @@ try {
   await assertPageClean(options, 'options')
   closeView(options)
 
+  const marketing = openView(1280, 900)
+  await marketing.navigate(origin('example.test', '/marketing.html'))
+  await waitFor(marketing, `document.querySelector('.marketing-hero h1')?.textContent === 'Adblock'`, 'marketing ready state')
+  await assertNoHorizontalOverflow(marketing, 'marketing desktop')
+  await screenshot(marketing, 'marketing-desktop.png')
+  await marketing.resize(430, 900)
+  await assertNoHorizontalOverflow(marketing, 'marketing mobile')
+  await screenshot(marketing, 'marketing-mobile.png')
+  await assertPageClean(marketing, 'marketing')
+  closeView(marketing)
+
   if (errors.length) throw new Error(`WebView console errors:\n${errors.join('\n')}`)
 
   console.log([
@@ -150,6 +161,7 @@ try {
     `x=${xHidden}`,
     `popup=${todayBlocked}`,
     `dashboard=${dashboardBlocked}`,
+    'marketing=ok',
     `screenshots=${screenshotDir}`,
   ].join(' '))
 }

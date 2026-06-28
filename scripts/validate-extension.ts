@@ -45,7 +45,7 @@ for (const [size, icon] of Object.entries(manifest.icons ?? {})) {
   if (bytes.byteLength < 100) throw new Error(`Manifest icon ${size} is unexpectedly small: ${icon}`)
 }
 
-for (const htmlFile of ['popup.html', 'options.html']) {
+for (const htmlFile of ['popup.html', 'options.html', 'marketing.html']) {
   const html = await Bun.file(join(dist, htmlFile)).text()
   const inlineScript = /<script(?![^>]+\bsrc=)[^>]*>/i
   const inlineStyle = /<style\b/i

@@ -26,6 +26,8 @@ bun run build
 
 Load `dist/` as an unpacked extension in Chrome.
 
+The STX marketing page is emitted at `dist/marketing.html` during `bun run build`.
+
 ## Scripts
 
 ```bash

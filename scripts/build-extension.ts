@@ -12,7 +12,7 @@ async function clean(): Promise<void> {
 }
 
 async function buildPages(): Promise<void> {
-  const entrypoints = ['pages/popup.stx', 'pages/options.stx']
+  const entrypoints = ['pages/popup.stx', 'pages/options.stx', 'pages/marketing.stx']
   const result = await Bun.build({
     entrypoints,
     outdir,
@@ -28,21 +28,28 @@ async function buildPages(): Promise<void> {
     throw new Error('Failed to build STX pages')
   }
 
-  await sanitizeHtml('popup.html', 'popup.js')
-  await sanitizeHtml('options.html', 'options.js')
+  await sanitizeHtml('popup.html', ['popup.js'])
+  await sanitizeHtml('options.html', ['options.js'])
+  await sanitizeHtml('marketing.html', [])
   await removeStxChunks()
 }
 
-async function sanitizeHtml(filename: string, scriptName: string): Promise<void> {
+async function sanitizeHtml(filename: string, scriptNames: string[]): Promise<void> {
   const file = `${outdir}/${filename}`
   let html = await Bun.file(file).text()
+  const protectedScripts = scriptNames
+    .map(scriptName => `(?![^>]*src="/?${scriptName.replace('.', '\\.')}")`)
+    .join('')
 
   html = html
     .replace(/\n?<!-- stx SEO Tags -->[\s\S]*?(?=\n\s*<meta charset=)/, '')
     .replace(/\n?\s*<style\b[\s\S]*?<\/style>/g, '')
-    .replace(/\n?\s*<script\b(?![^>]*src="\/?popup\.js")(?![^>]*src="\/?options\.js")[\s\S]*?<\/script>/g, '')
+    .replace(new RegExp(`\\n?\\s*<script\\b${protectedScripts}[\\s\\S]*?<\\/script>`, 'g'), '')
     .replaceAll('href="/styles.css"', 'href="styles.css"')
-    .replaceAll(`src="/${scriptName}"`, `src="${scriptName}"`)
+
+  for (const scriptName of scriptNames) {
+    html = html.replaceAll(`src="/${scriptName}"`, `src="${scriptName}"`)
+  }
 
   await Bun.write(file, html)
 }
