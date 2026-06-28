@@ -9,7 +9,7 @@ A polished Chrome Manifest V3 ad blocker built with Bun, TypeScript, and STX.
 - Pinned generated host rules from EasyList and AdGuard filter-list revisions.
 - Cosmetic filtering and cleanup for common ad containers.
 - Balanced YouTube and X/Twitter cleanup through content scripts.
-- Local-first stats for blocked ads, estimated data saved, and estimated video time saved.
+- Local-first stats for blocked ads, estimated data saved, and estimated video time saved, with compact Chrome cloud sync for fresh installs.
 - Premium STX popup and dashboard UI with external scripts for MV3 CSP safety.
 - Bun WebView smoke coverage for UI rendering, screenshots, content cleanup, and overflow checks.
 
@@ -40,4 +40,4 @@ bun run lint
 
 The UI is authored as `.stx` pages and compiled by `bun-plugin-stx`. Runtime behavior is bundled into external TypeScript modules because Manifest V3 extension pages cannot rely on inline scripts.
 
-Stats stay local to the browser. Compact settings and lifetime totals use `chrome.storage.sync`; high-churn hourly/daily/site stats use `chrome.storage.local`.
+Stats are local-first. Compact settings, lifetime totals, daily history, and top-site rollups use `chrome.storage.sync` so a new Chrome install can hydrate the dashboard; high-churn hourly/site-detail/recent-event data stays in `chrome.storage.local`.

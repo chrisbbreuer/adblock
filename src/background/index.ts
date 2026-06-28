@@ -6,9 +6,11 @@ import { hostnameFromUrl } from '../shared/domain'
 import { formatBytes } from '../shared/metrics'
 import {
   getActiveTabState,
+  getCloudStatsSnapshot,
   getLifetimeStats,
   getLocalStats,
   getSettings,
+  hydrateSyncedStats,
   initializeStorage,
   recordBlockEvents,
   resetStats,
@@ -36,9 +38,17 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, sender, sendRespo
 })
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName !== 'sync' || !changes.settings?.newValue) return
-  void syncDynamicRules(changes.settings.newValue as ExtensionSettings)
-  void updateBadge()
+  if (areaName !== 'sync') return
+
+  if (changes.settings?.newValue) {
+    void syncDynamicRules(changes.settings.newValue as ExtensionSettings)
+    void updateBadge()
+  }
+
+  if (changes.cloudStats?.newValue) {
+    void hydrateSyncedStats(changes.cloudStats.newValue)
+    void updateBadge()
+  }
 })
 
 async function setup(): Promise<void> {
@@ -82,11 +92,18 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
 async function getDashboard(): Promise<DashboardState> {
   const settings = await getSettings()
   const activeTab = await getActiveTabState(settings)
+  const cloudStats = await getCloudStatsSnapshot()
 
   return {
     settings,
     lifetime: await getLifetimeStats(),
     local: await getLocalStats(),
+    cloudSync: {
+      available: Boolean(cloudStats),
+      syncedAt: cloudStats?.syncedAt,
+      dailyBuckets: cloudStats?.daily.length ?? 0,
+      siteRollups: cloudStats?.sites.length ?? 0,
+    },
     activeTab,
     dnr: await getDnrTelemetry(activeTab?.url),
     filters: {

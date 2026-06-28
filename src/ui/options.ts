@@ -101,7 +101,7 @@ function render(next: DashboardState): void {
   elements.rulesStatus.textContent = `${next.filters.staticRuleCount.toLocaleString()} static rules`
   elements.allowedCount.textContent = String(next.settings.allowedSites.length)
   elements.blockedCount.textContent = String(next.settings.blockedSites.length)
-  elements.status.textContent = 'Dashboard data is stored locally with compact settings synced by Chrome.'
+  elements.status.textContent = 'Lifetime stats and compact history sync through Chrome; detailed history stays local.'
 
   renderBars(elements.dailyChart, next.local.daily.map(bucket => bucket.adsBlocked), 60)
   renderAllowedSites(next)
@@ -153,6 +153,9 @@ function renderDiagnostics(next: DashboardState): void {
     ['Daily buckets', next.local.daily.length],
     ['Tracked sites', Object.keys(next.local.sites).length],
     ['Recent events', next.local.recentEvents.length],
+    ['Cloud sync', next.cloudSync.available ? cloudSyncLabel(next.cloudSync.syncedAt) : 'Pending'],
+    ['Cloud daily history', next.cloudSync.dailyBuckets],
+    ['Cloud site rollups', next.cloudSync.siteRollups],
     ['Static rules', next.filters.staticRuleCount],
     ['Generated hosts', next.filters.generatedHostRules],
     ['Filter sources', next.filters.sources.length],
@@ -177,4 +180,9 @@ function pill(text: string): HTMLButtonElement {
   button.type = 'button'
   button.textContent = text
   return button
+}
+
+function cloudSyncLabel(syncedAt?: string): string {
+  if (!syncedAt) return 'Ready'
+  return `Synced ${new Date(syncedAt).toLocaleDateString()}`
 }

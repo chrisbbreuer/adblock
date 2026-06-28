@@ -52,10 +52,26 @@ export interface LocalStats {
   recentEvents: BlockEvent[]
 }
 
+export interface CloudStatsSnapshot {
+  schemaVersion: 1
+  lifetime: LifetimeStats
+  daily: StatBucket[]
+  sites: SiteStats[]
+  syncedAt: string
+}
+
+export interface CloudSyncState {
+  available: boolean
+  syncedAt?: string
+  dailyBuckets: number
+  siteRollups: number
+}
+
 export interface DashboardState {
   settings: ExtensionSettings
   lifetime: LifetimeStats
   local: LocalStats
+  cloudSync: CloudSyncState
   activeTab?: ActiveTabState
   dnr: DnrTelemetry
   filters: FilterMetadata

@@ -402,6 +402,12 @@ function makeDashboardState(): DashboardState {
       lastUpdated: now.toISOString(),
     },
     local,
+    cloudSync: {
+      available: true,
+      syncedAt: now.toISOString(),
+      dailyBuckets: daily.length,
+      siteRollups: Object.keys(local.sites).length,
+    },
     activeTab: {
       hostname: 'example.test',
       url: 'https://example.test/',
