@@ -2,6 +2,10 @@
 
 A polished Chrome Manifest V3 ad blocker built with Bun, TypeScript, and STX.
 
+## Why
+
+Adblock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it; I want those distractions gone immediately.
+
 ## Features
 
 - Chrome MV3 `declarativeNetRequest` blocking with static bundled rules.
