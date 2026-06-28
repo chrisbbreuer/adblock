@@ -5,6 +5,7 @@
     "": {
       "name": "adblock",
       "dependencies": {
+        "@stacksjs/stx": "^0.2.72",
         "bun-plugin-stx": "^0.2.72",
       },
       "devDependencies": {
