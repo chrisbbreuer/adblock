@@ -25,7 +25,9 @@ Load `dist/` as an unpacked extension in Chrome.
 ```bash
 bun run build
 bun run package
+bun run validate:extension
 bun run validate:rules
+bun run smoke:chrome
 bun run test
 bun run typecheck
 bun run lint

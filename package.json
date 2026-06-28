@@ -23,6 +23,8 @@
   "scripts": {
     "build": "bun --bun scripts/build-extension.ts",
     "package": "bun run build && bun --bun scripts/package-extension.ts",
+    "smoke:chrome": "bun run build && bun --bun scripts/smoke-extension.ts",
+    "validate:extension": "bun --bun scripts/validate-extension.ts",
     "validate:rules": "bun --bun scripts/validate-rules.ts",
     "test": "bun test",
     "lint": "bunx --bun pickier . --config .config/pickier.ts",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@types/chrome": "^0.1.4",
     "better-dx": "^0.2.15",
+    "playwright": "^1.57.0",
     "typescript": "^5.9.3"
   },
   "git-hooks": {

@@ -110,5 +110,35 @@ jobs:
       - name: Validate Rules
         run: bun run validate:rules
 
+      - name: Validate Extension Artifact
+        run: bun run validate:extension
+
       - name: Package Extension
         run: bun run package
+
+  smoke:
+    needs: [build]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Use cached node_modules
+        uses: actions/cache@v5
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('**/bun.lock') }}
+          restore-keys: |
+            node-modules-
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+
+      - name: Smoke Test Extension
+        run: xvfb-run -a bun run smoke:chrome
