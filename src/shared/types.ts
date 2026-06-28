@@ -57,7 +57,29 @@ export interface DashboardState {
   lifetime: LifetimeStats
   local: LocalStats
   activeTab?: ActiveTabState
+  dnr: DnrTelemetry
+  filters: FilterMetadata
   manifestVersion: string
+}
+
+export interface DnrTelemetry {
+  available: boolean
+  recentMatchedRules: number
+  activeTabMatchedRules: number
+  rulesetHits: Record<string, number>
+  checkedAt: string
+  reason?: string
+}
+
+export interface FilterMetadata {
+  staticRuleCount: number
+  generatedHostRules: number
+  sources: Array<{
+    name: string
+    revision: string
+    hosts: number
+    sha256: string
+  }>
 }
 
 export interface ActiveTabState {

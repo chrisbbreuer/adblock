@@ -54,7 +54,7 @@
         <article class="glass-panel dashboard-panel">
           <div class="section-heading">
             <span>Protection</span>
-            <strong id="rules-status">Static + dynamic</strong>
+            <strong id="rules-status">Loading</strong>
           </div>
           <label class="toggle-row">
             <span>Global protection</span>
@@ -88,6 +88,18 @@
             <button class="soft-button" type="submit">Add</button>
           </form>
           <div id="allowed-sites" class="pill-list"></div>
+        </article>
+
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>Blocked sites</span>
+            <strong id="blocked-count">0</strong>
+          </div>
+          <form id="block-form" class="site-form">
+            <input id="block-host" type="text" placeholder="ads.example.com" autocomplete="off">
+            <button class="soft-button" type="submit">Add</button>
+          </form>
+          <div id="blocked-sites" class="pill-list"></div>
         </article>
 
         <article class="glass-panel dashboard-panel">

@@ -14,10 +14,15 @@ const elements = {
   youtube: byId<HTMLInputElement>('setting-youtube'),
   x: byId<HTMLInputElement>('setting-x'),
   badge: byId<HTMLInputElement>('setting-badge'),
+  rulesStatus: byId('rules-status'),
   allowedCount: byId('allowed-count'),
   allowForm: byId<HTMLFormElement>('allow-form'),
   allowHost: byId<HTMLInputElement>('allow-host'),
   allowedSites: byId('allowed-sites'),
+  blockedCount: byId('blocked-count'),
+  blockForm: byId<HTMLFormElement>('block-form'),
+  blockHost: byId<HTMLInputElement>('block-host'),
+  blockedSites: byId('blocked-sites'),
   diagnostics: byId('diagnostics'),
   status: byId('options-status'),
   exportData: byId<HTMLButtonElement>('export-data'),
@@ -52,6 +57,17 @@ elements.allowForm.addEventListener('submit', async (event) => {
   render(state)
 })
 
+elements.blockForm.addEventListener('submit', async (event) => {
+  event.preventDefault()
+  if (!state) return
+  const hostname = normalizeHostname(elements.blockHost.value)
+  if (!hostname) return
+  const blockedSites = [...new Set([...state.settings.blockedSites, hostname])]
+  state = await sendMessage<DashboardState>({ type: 'set-settings', settings: { blockedSites } })
+  elements.blockHost.value = ''
+  render(state)
+})
+
 elements.exportData.addEventListener('click', async () => {
   const data = await sendMessage<DashboardState>({ type: 'export-data' })
   downloadJson(`adblock-export-${new Date().toISOString().slice(0, 10)}.json`, data)
@@ -82,11 +98,14 @@ function render(next: DashboardState): void {
   elements.youtube.checked = next.settings.youtubeEnhancements
   elements.x.checked = next.settings.xEnhancements
   elements.badge.checked = next.settings.badgeEnabled
+  elements.rulesStatus.textContent = `${next.filters.staticRuleCount.toLocaleString()} static rules`
   elements.allowedCount.textContent = String(next.settings.allowedSites.length)
+  elements.blockedCount.textContent = String(next.settings.blockedSites.length)
   elements.status.textContent = 'Dashboard data is stored locally with compact settings synced by Chrome.'
 
   renderBars(elements.dailyChart, next.local.daily.map(bucket => bucket.adsBlocked), 60)
   renderAllowedSites(next)
+  renderBlockedSites(next)
   renderDiagnostics(next)
 }
 
@@ -109,12 +128,37 @@ function renderAllowedSites(next: DashboardState): void {
   )
 }
 
+function renderBlockedSites(next: DashboardState): void {
+  if (!next.settings.blockedSites.length) {
+    elements.blockedSites.replaceChildren(pill('No blocked sites'))
+    return
+  }
+
+  elements.blockedSites.replaceChildren(
+    ...next.settings.blockedSites.map((hostname) => {
+      const button = pill(hostname)
+      button.addEventListener('click', async () => {
+        const blockedSites = next.settings.blockedSites.filter(site => site !== hostname)
+        state = await sendMessage<DashboardState>({ type: 'set-settings', settings: { blockedSites } })
+        render(state)
+      })
+      return button
+    }),
+  )
+}
+
 function renderDiagnostics(next: DashboardState): void {
   const rows = [
     ['Hourly buckets', next.local.hourly.length],
     ['Daily buckets', next.local.daily.length],
     ['Tracked sites', Object.keys(next.local.sites).length],
     ['Recent events', next.local.recentEvents.length],
+    ['Static rules', next.filters.staticRuleCount],
+    ['Generated hosts', next.filters.generatedHostRules],
+    ['Filter sources', next.filters.sources.length],
+    ['DNR telemetry', next.dnr.available ? `${next.dnr.recentMatchedRules} recent` : 'Unavailable'],
+    ['Active-tab DNR', next.dnr.available ? next.dnr.activeTabMatchedRules : 0],
+    ['Privacy', 'No telemetry'],
   ]
 
   elements.diagnostics.replaceChildren(

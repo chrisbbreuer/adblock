@@ -14,7 +14,7 @@ const elements = {
   hourlyChart: byId('hourly-chart'),
   currentSite: byId('current-site'),
   siteToggle: byId<HTMLButtonElement>('site-toggle'),
-  topSites: byId('top-sites'),
+  topCategories: byId('top-categories'),
   status: byId('status-message'),
   openOptions: byId<HTMLButtonElement>('open-options'),
 }
@@ -71,24 +71,28 @@ function render(next: DashboardState): void {
   elements.status.textContent = allowed ? 'This site is allowed. Global protection remains available elsewhere.' : 'Estimated savings are computed locally.'
 
   renderBars(elements.hourlyChart, next.local.hourly.map(bucket => bucket.adsBlocked), 24)
-  renderTopSites(next)
+  renderTopCategories(next)
 }
 
-function renderTopSites(next: DashboardState): void {
-  const sites = Object.values(next.local.sites)
-    .sort((a, b) => b.adsBlocked - a.adsBlocked)
+function renderTopCategories(next: DashboardState): void {
+  const categories = Object.entries(next.local.recentEvents.reduce<Record<string, number>>((totals, event) => {
+    const key = event.source === 'video' ? 'video ads' : event.source
+    totals[key] = (totals[key] ?? 0) + event.count
+    return totals
+  }, {}))
+    .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
 
-  if (!sites.length) {
-    elements.topSites.replaceChildren(emptyRow('No blocked ads yet'))
+  if (!categories.length) {
+    elements.topCategories.replaceChildren(emptyRow('No blocked ads yet'))
     return
   }
 
-  elements.topSites.replaceChildren(
-    ...sites.map((site) => {
+  elements.topCategories.replaceChildren(
+    ...categories.map(([category, count]) => {
       const row = document.createElement('div')
       row.className = 'site-row'
-      row.innerHTML = `<span>${site.hostname}</span><strong>${site.adsBlocked.toLocaleString()}</strong>`
+      row.replaceChildren(label(category), strong(count.toLocaleString()))
       return row
     }),
   )
@@ -99,4 +103,16 @@ function emptyRow(text: string): HTMLElement {
   row.className = 'muted site-row'
   row.textContent = text
   return row
+}
+
+function label(text: string): HTMLElement {
+  const element = document.createElement('span')
+  element.textContent = text
+  return element
+}
+
+function strong(text: string): HTMLElement {
+  const element = document.createElement('strong')
+  element.textContent = text
+  return element
 }

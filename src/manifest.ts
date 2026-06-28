@@ -19,7 +19,7 @@ export function buildManifest(input: ManifestInput): chrome.runtime.ManifestV3 {
       service_worker: 'background.js',
       type: 'module',
     },
-    permissions: ['declarativeNetRequest', 'storage', 'tabs', 'scripting'],
+    permissions: ['declarativeNetRequest', 'declarativeNetRequestFeedback', 'storage', 'tabs', 'scripting'],
     host_permissions: ['http://*/*', 'https://*/*'],
     icons: {
       16: 'icons/icon-16.png',

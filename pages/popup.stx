@@ -52,12 +52,12 @@
         <button id="site-toggle" class="soft-button" type="button">Allow</button>
       </section>
 
-      <section class="category-list" aria-label="Top blocked sites">
+      <section class="category-list" aria-label="Top blocked categories">
         <div class="section-heading">
-          <span>Top sites</span>
+          <span>Top categories</span>
           <button id="open-options" class="icon-button" type="button" aria-label="Open dashboard">↗</button>
         </div>
-        <div id="top-sites"></div>
+        <div id="top-categories"></div>
       </section>
 
       <p id="status-message" class="status-message" role="status">Loading protection state...</p>

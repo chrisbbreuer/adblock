@@ -2,6 +2,8 @@ import { dynamicRuleEndId, dynamicRuleStartId } from '../shared/constants'
 import { normalizeHostname } from '../shared/domain'
 import type { ExtensionSettings } from '../shared/types'
 
+let syncQueue = Promise.resolve()
+
 function ruleId(offset: number): number {
   return dynamicRuleStartId + offset
 }
@@ -45,6 +47,11 @@ function resourceType(value: string): chrome.declarativeNetRequest.ResourceType 
 }
 
 export async function syncDynamicRules(settings: ExtensionSettings): Promise<void> {
+  syncQueue = syncQueue.catch(() => undefined).then(() => applyDynamicRules(settings))
+  await syncQueue
+}
+
+async function applyDynamicRules(settings: ExtensionSettings): Promise<void> {
   const existing = await chrome.declarativeNetRequest.getDynamicRules()
   const removeRuleIds = existing
     .map(rule => rule.id)
