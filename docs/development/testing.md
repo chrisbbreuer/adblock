@@ -1,11 +1,11 @@
 ---
 title: Testing
-description: How Adblock verifies rules, UI, YouTube cleanup, and packaged output.
+description: How Very Good AdBlock verifies rules, UI, YouTube cleanup, and packaged output.
 ---
 
 # Testing
 
-Adblock has focused unit tests, rule validation, artifact validation, package checks, and Bun WebView smoke coverage.
+Very Good AdBlock has focused unit tests, rule validation, artifact validation, package checks, and Bun WebView smoke coverage.
 
 ## Core Checks
 

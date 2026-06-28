@@ -1,11 +1,11 @@
 ---
 title: Blocking Model
-description: How Adblock combines DNR rules, dynamic rules, and content scripts.
+description: How Very Good AdBlock combines DNR rules, dynamic rules, and content scripts.
 ---
 
 # Blocking Model
 
-Adblock uses a balanced Manifest V3 architecture:
+Very Good AdBlock uses a balanced Manifest V3 architecture:
 
 - Static `declarativeNetRequest` rules for known network ad domains and URL patterns.
 - Dynamic `declarativeNetRequest` rules for user site overrides.

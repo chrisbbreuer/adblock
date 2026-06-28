@@ -192,7 +192,7 @@ async function updateBadge(tabUrl?: string): Promise<void> {
   await chrome.action.setBadgeBackgroundColor({ color: '#17c964' })
   await chrome.action.setBadgeText({ text: site?.adsBlocked ? compactBadge(site.adsBlocked) : '' })
   await chrome.action.setTitle({
-    title: site ? `Adblock blocked ${site.adsBlocked} ads and saved about ${formatBytes(site.bytesSaved)} here.` : 'Adblock',
+    title: site ? `Very Good AdBlock blocked ${site.adsBlocked} ads and saved about ${formatBytes(site.bytesSaved)} here.` : 'Very Good AdBlock',
   })
 }
 

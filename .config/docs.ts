@@ -7,9 +7,9 @@ const config: BunPressOptions = {
   theme: 'vitepress',
 
   markdown: {
-    title: 'Adblock Docs',
+    title: 'Very Good AdBlock Docs',
     meta: {
-      description: 'Documentation for the Adblock Chrome MV3 extension.',
+      description: 'Documentation for the Very Good AdBlock Chrome MV3 extension.',
       author: 'Chris Breuer',
       viewport: 'width=device-width, initial-scale=1.0',
     },
@@ -93,7 +93,7 @@ const config: BunPressOptions = {
 
   sitemap: {
     enabled: true,
-    baseUrl: 'https://github.com/chrisbbreuer/adblock',
+    baseUrl: 'https://verygoodadblock.org',
     filename: 'sitemap.xml',
   },
 

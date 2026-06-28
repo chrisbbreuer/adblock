@@ -151,7 +151,7 @@ try {
 
   const marketing = openView(1280, 900)
   await marketing.navigate(origin('example.test', '/marketing.html'))
-  await waitFor(marketing, `document.querySelector('.marketing-hero h1')?.textContent === 'Adblock'`, 'marketing ready state')
+  await waitFor(marketing, `document.querySelector('.marketing-hero h1')?.textContent === 'Very Good AdBlock'`, 'marketing ready state')
   await assertNoHorizontalOverflow(marketing, 'marketing desktop')
   await screenshot(marketing, 'marketing-desktop.png')
   await marketing.resize(430, 900)
@@ -163,7 +163,7 @@ try {
   if (errors.length) throw new Error(`WebView console errors:\n${errors.join('\n')}`)
 
   console.log([
-    'Bun WebView smoke tested Adblock:',
+    'Bun WebView smoke tested Very Good AdBlock:',
     `generic=${genericHidden}`,
     `youtube=${youtubeHidden}`,
     `shorts=${shortsHidden}`,

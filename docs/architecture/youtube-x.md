@@ -1,6 +1,6 @@
 ---
 title: YouTube and X
-description: How Adblock handles YouTube video ads and X/Twitter promoted content.
+description: How Very Good AdBlock handles YouTube video ads and X/Twitter promoted content.
 ---
 
 # YouTube and X

@@ -1,11 +1,11 @@
 ---
 title: Development
-description: Development workflow for the Adblock extension and docs.
+description: Development workflow for the Very Good AdBlock extension and docs.
 ---
 
 # Development
 
-Adblock is a Bun TypeScript project with STX-authored extension UI and Bunpress-authored docs.
+Very Good AdBlock is a Bun TypeScript project with STX-authored extension UI and Bunpress-authored docs.
 
 ## Extension Build
 

@@ -5,7 +5,7 @@ description: Local-first tracking with compact Chrome sync restore.
 
 # Stats and Cloud Sync
 
-Adblock tracks stats locally first, then syncs a compact snapshot through Chrome so a fresh install can restore the important totals.
+Very Good AdBlock tracks stats locally first, then syncs a compact snapshot through Chrome so a fresh install can restore the important totals.
 
 ## Lifetime Totals
 
@@ -34,4 +34,4 @@ Compact cloud data is stored in `chrome.storage.sync`:
 - Last 60 daily buckets.
 - Top 20 site rollups.
 
-On startup or install, Adblock hydrates local dashboard data from the cloud snapshot. Merge logic uses the highest observed values for counters so the same synced stats do not get counted twice.
+On startup or install, Very Good AdBlock hydrates local dashboard data from the cloud snapshot. Merge logic uses the highest observed values for counters so the same synced stats do not get counted twice.

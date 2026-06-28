@@ -70,7 +70,7 @@ elements.blockForm.addEventListener('submit', async (event) => {
 
 elements.exportData.addEventListener('click', async () => {
   const data = await sendMessage<DashboardState>({ type: 'export-data' })
-  downloadJson(`adblock-export-${new Date().toISOString().slice(0, 10)}.json`, data)
+  downloadJson(`very-good-adblock-export-${new Date().toISOString().slice(0, 10)}.json`, data)
 })
 
 elements.resetStats.addEventListener('click', async () => {

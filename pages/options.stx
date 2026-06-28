@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Adblock Dashboard</title>
+    <title>Very Good AdBlock Dashboard</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body class="dashboard-shell">
     <main class="dashboard-layout">
       <header class="dashboard-header">
         <div>
-          <p class="eyebrow">Adblock</p>
+          <p class="eyebrow">Very Good AdBlock</p>
           <h1>Protection dashboard</h1>
         </div>
         <div class="header-actions">

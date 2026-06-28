@@ -3,40 +3,40 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Adblock is a polished STX-powered Chrome MV3 extension built to remove intrusive ads, popups, promoted posts, and video ad interruptions immediately.">
-    <title>Adblock - Immediate, Local Ad Protection</title>
+    <meta name="description" content="Very Good AdBlock is a polished STX-powered Chrome MV3 extension built to remove intrusive ads, popups, promoted posts, and video ad interruptions immediately.">
+    <title>Very Good AdBlock - Immediate, Local Ad Protection</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body class="marketing-shell">
     <header class="marketing-nav" aria-label="Primary navigation">
-      <a class="brand-lockup" href="#top" aria-label="Adblock home">
+      <a class="brand-lockup" href="#top" aria-label="Very Good AdBlock home">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>Adblock</span>
+        <span>Very Good AdBlock</span>
       </a>
       <nav>
         <a href="#features">Features</a>
         <a href="#stats">Stats</a>
         <a href="#privacy">Privacy</a>
       </nav>
-      <a class="nav-action" href="options.html">Open dashboard</a>
+      <a class="nav-action" href="docs/">Read docs</a>
     </header>
 
     <main id="top">
       <section class="marketing-hero">
         <div class="hero-copy">
           <p class="eyebrow">Chrome MV3 · STX · Local-first</p>
-          <h1>Adblock</h1>
+          <h1>Very Good AdBlock</h1>
           <p class="hero-lede">
-            Built because waiting for the next popup fix is the wrong deal. Adblock blocks intrusive ads,
+            Built because waiting for the next popup fix is the wrong deal. Very Good AdBlock blocks intrusive ads,
             promoted noise, and video interruptions before they get a chance to take over the page.
           </p>
           <div class="hero-actions">
-            <a class="primary-link" href="options.html">View dashboard</a>
+            <a class="primary-link" href="docs/guide/install">Install locally</a>
             <a class="secondary-link" href="#features">See protection</a>
           </div>
         </div>
 
-        <div class="hero-product" aria-label="Adblock product preview">
+        <div class="hero-product" aria-label="Very Good AdBlock product preview">
           <div class="browser-preview">
             <div class="browser-bar">
               <span></span>
@@ -119,11 +119,11 @@
           <p class="eyebrow">Receipts</p>
           <h2>Local stats make blocking visible over time.</h2>
           <p>
-            Adblock tracks lifetime ads blocked, daily history, estimated bandwidth saved, and estimated video minutes recovered.
+            Very Good AdBlock tracks lifetime ads blocked, daily history, estimated bandwidth saved, and estimated video minutes recovered.
             Sync-backed totals can follow a user into a new install while detailed histories stay local.
           </p>
         </div>
-        <div class="stat-wall" aria-label="Adblock stats examples">
+        <div class="stat-wall" aria-label="Very Good AdBlock stats examples">
           <article>
             <strong>52,910</strong>
             <span>lifetime blocks</span>
@@ -162,9 +162,9 @@
     </main>
 
     <footer class="marketing-footer">
-      <span>Adblock</span>
-      <a href="options.html">Dashboard</a>
-      <a href="popup.html">Popup preview</a>
+      <span>Very Good AdBlock</span>
+      <a href="docs/">Docs</a>
+      <a href="docs/guide/usage">Usage</a>
     </footer>
   </body>
 </html>

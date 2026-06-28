@@ -1,11 +1,11 @@
 ---
 title: Install
-description: Build and load Adblock as an unpacked Chrome extension.
+description: Build and load Very Good AdBlock as an unpacked Chrome extension.
 ---
 
 # Install
 
-Adblock is currently built as a Chrome Manifest V3 extension.
+Very Good AdBlock is currently built as a Chrome Manifest V3 extension.
 
 ## Requirements
 

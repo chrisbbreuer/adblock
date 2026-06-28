@@ -1,6 +1,6 @@
-export const extensionName = 'Adblock'
-export const extensionDescription = 'A polished STX-powered Chrome MV3 ad blocker.'
-export const staticRulesetId = 'adblock_static_rules'
+export const extensionName = 'Very Good AdBlock'
+export const extensionDescription = 'A polished Chrome MV3 ad blocker for immediate popup, ad, and video interruption cleanup.'
+export const staticRulesetId = 'very_good_adblock_static_rules'
 export const dynamicRuleStartId = 50000
 export const dynamicRuleEndId = 50999
 export const maxRecentEvents = 240

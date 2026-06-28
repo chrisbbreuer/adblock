@@ -1,10 +1,10 @@
-# Adblock
+# Very Good AdBlock
 
 A polished Chrome Manifest V3 ad blocker built with Bun, TypeScript, and STX.
 
 ## Why
 
-Adblock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it; I want those distractions gone immediately.
+Very Good AdBlock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it; I want those distractions gone immediately.
 
 ## Features
 
@@ -27,6 +27,7 @@ bun run build
 Load `dist/` as an unpacked extension in Chrome.
 
 The STX marketing page is emitted at `dist/marketing.html` during `bun run build`.
+The deployable website is emitted at `dist/site` during `bun run site:build`, with docs mounted under `/docs`.
 
 ## Scripts
 
@@ -35,6 +36,7 @@ bun run build
 bun run docs:build
 bun run docs:dev
 bun run docs:preview
+bun run site:build
 bun run package
 bun run update:filters
 bun run validate:extension
