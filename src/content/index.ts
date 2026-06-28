@@ -45,8 +45,8 @@ function sweep(settings: ExtensionSettings): void {
   if (settings.cosmeticFiltering) hideSelectors(defaultCosmeticSelectors, 'cosmetic', 'other')
 
   if (settings.youtubeEnhancements && isYouTube()) {
-    hideSelectors(youtubeSelectors, 'youtube', 'media')
     clickYouTubeSkip()
+    hideSelectors(youtubeSelectors, 'youtube', 'media')
   }
 
   if (settings.xEnhancements && isX()) {
