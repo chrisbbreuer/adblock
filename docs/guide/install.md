@@ -1,11 +1,11 @@
 ---
 title: Install
-description: Build and load Very Good AdBlock as an unpacked Chrome extension.
+description: Build and load the performant, minimal, modern Very Good AdBlock Chrome extension.
 ---
 
 # Install
 
-Very Good AdBlock is currently built as a Chrome Manifest V3 extension.
+Very Good AdBlock is currently built as a performant, minimal, modern Chrome Manifest V3 extension.
 
 ## Requirements
 

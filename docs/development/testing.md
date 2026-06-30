@@ -1,6 +1,6 @@
 ---
 title: Testing
-description: How Very Good AdBlock verifies rules, UI, YouTube cleanup, and packaged output.
+description: How Very Good AdBlock verifies rules, UI, performance-sensitive cleanup, and packaged output.
 ---
 
 # Testing

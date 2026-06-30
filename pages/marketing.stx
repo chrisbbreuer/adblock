@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Very Good AdBlock is a polished Chrome MV3 extension built to remove intrusive ads, popups, promoted posts, and video ad interruptions immediately.">
-    <title>Very Good AdBlock - Immediate, Local Ad Protection</title>
+    <meta name="description" content="Very Good AdBlock is a polished, performant, minimal, modern Chrome MV3 ad blocker for immediate popup, ad, and video interruption cleanup.">
+    <title>Very Good AdBlock - Immediate, Modern Ad Protection</title>
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body class="marketing-shell">
@@ -24,11 +24,11 @@
     <main id="top">
       <section class="marketing-hero">
         <div class="hero-copy">
-          <p class="eyebrow">Chrome MV3 · local-first protection</p>
+          <p class="eyebrow">Chrome MV3 · performant · minimal · modern</p>
           <h1>Very Good AdBlock</h1>
           <p class="hero-lede">
-            Built because waiting for the next popup fix is the wrong deal. Very Good AdBlock blocks intrusive ads,
-            promoted noise, and video interruptions before they get a chance to take over the page.
+            A polished, performant, minimal, modern Chrome MV3 ad blocker for immediate popup, ad, and video interruption cleanup.
+            Built to stay fast, minimal, and modern while removing intrusive ads before they take over the page.
           </p>
           <div class="hero-actions">
             <a class="primary-link" href="docs/guide/install">Install locally</a>
@@ -88,7 +88,7 @@
       <section id="features" class="marketing-band">
         <div class="section-kicker">
           <p class="eyebrow">Coverage</p>
-          <h2>Blocks the interruptions people actually feel.</h2>
+          <h2>Immediate cleanup for the interruptions people actually feel.</h2>
         </div>
         <div class="feature-grid">
           <article>
@@ -109,7 +109,7 @@
           <article>
             <span class="feature-icon control" aria-hidden="true"></span>
             <h3>One-click control</h3>
-            <p>Pause protection per site, manage allowlists, and inspect diagnostics from a polished popup and full dashboard.</p>
+            <p>Pause protection per site, manage allowlists, and inspect diagnostics from a minimal popup and modern dashboard.</p>
           </article>
         </div>
       </section>
@@ -117,7 +117,7 @@
       <section id="stats" class="stats-showcase">
         <div>
           <p class="eyebrow">Receipts</p>
-          <h2>Local stats make blocking visible over time.</h2>
+          <h2>Modern local stats make blocking visible over time.</h2>
           <p>
             Very Good AdBlock tracks lifetime ads blocked, daily history, estimated bandwidth saved, and estimated video minutes recovered.
             Sync-backed totals can follow a user into a new install while detailed histories stay local.
@@ -149,14 +149,14 @@
           <h2>No hidden telemetry. No remote rule surprises.</h2>
           <p>
             Rules ship with releases, user site choices become local dynamic rules, and the dashboard clearly marks estimates.
-            The point is simple: remove the obstruction immediately and keep the user in control.
+            The point is simple: remove the obstruction immediately while keeping the extension performant, minimal, and user-controlled.
           </p>
         </div>
         <div class="privacy-list">
           <div><span></span>Chrome MV3 declarativeNetRequest</div>
+          <div><span></span>Performance-conscious content cleanup</div>
           <div><span></span>Local and sync storage split</div>
           <div><span></span>Exportable stats and reset controls</div>
-          <div><span></span>Extension-safe pages with external scripts</div>
         </div>
       </section>
     </main>

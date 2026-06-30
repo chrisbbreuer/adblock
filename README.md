@@ -1,10 +1,10 @@
 # Very Good AdBlock
 
-A polished Chrome Manifest V3 ad blocker built with Bun, TypeScript, and STX.
+A polished, performant, minimal, modern Chrome Manifest V3 ad blocker for immediate popup, ad, and video interruption cleanup, built with Bun, TypeScript, and STX.
 
 ## Why
 
-Very Good AdBlock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it; I want those distractions gone immediately.
+Very Good AdBlock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it; I want those distractions gone immediately, with a blocker that stays fast, small, and modern.
 
 ## Features
 
@@ -14,7 +14,8 @@ Very Good AdBlock exists because I was tired of running into new popups, intrusi
 - Cosmetic filtering and cleanup for common ad containers.
 - Balanced YouTube and X/Twitter cleanup through content scripts.
 - Local-first stats for blocked ads, estimated data saved, and estimated video time saved, with compact Chrome cloud sync for fresh installs.
-- Premium STX popup and dashboard UI with external scripts for MV3 CSP safety.
+- Premium, minimal STX popup and dashboard UI with external scripts for MV3 CSP safety.
+- Performance-conscious content cleanup with throttled observers and resilient selectors.
 - Bun WebView smoke coverage for UI rendering, screenshots, content cleanup, and overflow checks.
 
 ## Setup

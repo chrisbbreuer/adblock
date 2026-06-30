@@ -1,6 +1,6 @@
 ---
 title: Development
-description: Development workflow for the Very Good AdBlock extension and docs.
+description: Development workflow for the performant, minimal, modern Very Good AdBlock extension and docs.
 ---
 
 # Development

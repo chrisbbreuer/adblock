@@ -1,11 +1,11 @@
 ---
 title: Usage
-description: Use the popup and dashboard to manage protection, stats, and site rules.
+description: Use the minimal popup and dashboard to manage protection, stats, and site rules.
 ---
 
 # Usage
 
-The popup is designed for quick decisions while browsing. The dashboard is for deeper history, settings, diagnostics, and reset/export controls.
+The popup is designed for quick, lightweight decisions while browsing. The dashboard is for deeper history, settings, diagnostics, and reset/export controls.
 
 ## Popup
 

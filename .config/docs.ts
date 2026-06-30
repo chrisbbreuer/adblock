@@ -9,7 +9,7 @@ const config: BunPressOptions = {
   markdown: {
     title: 'Very Good AdBlock Docs',
     meta: {
-      description: 'Documentation for the Very Good AdBlock Chrome MV3 extension.',
+      description: 'Docs for a polished, performant, minimal, modern Chrome MV3 ad blocker for immediate popup, ad, and video interruption cleanup.',
       author: 'Chris Breuer',
       viewport: 'width=device-width, initial-scale=1.0',
     },

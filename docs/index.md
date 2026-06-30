@@ -1,11 +1,11 @@
 ---
 title: Very Good AdBlock
-description: A polished Chrome MV3 ad blocker with local-first stats and immediate popup, placement, and video-ad cleanup.
+description: A polished, performant, minimal, modern Chrome MV3 ad blocker with local-first stats and immediate popup, placement, and video-ad cleanup.
 layout: home
 hero:
   name: Very Good AdBlock
   text: Block ads before they get in your way.
-  tagline: A Chrome Manifest V3 extension built because intrusive popups, obstructive placements, and video ads should be gone immediately, not after they interrupt you. It keeps lifetime stats, syncs compact totals for fresh installs, and stays transparent about estimates.
+  tagline: A polished, performant, minimal, modern Chrome Manifest V3 extension built because intrusive popups, obstructive placements, and video ads should be gone immediately, not after they interrupt you. It keeps lifetime stats, syncs compact totals for fresh installs, and stays transparent about estimates.
   actions:
     - theme: brand
       text: Install Locally
@@ -26,7 +26,7 @@ features:
 
 ## Why It Exists
 
-Very Good AdBlock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it. I want those distractions gone immediately.
+Very Good AdBlock exists because I was tired of running into new popups, intrusive placements, and obstructive ads that were not caught yet. I do not want to wait until an ad interrupts me to deal with it. I want those distractions gone immediately, using a blocker that stays performant, minimal, and modern.
 
 ## What It Tracks
 

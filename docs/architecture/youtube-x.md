@@ -1,11 +1,11 @@
 ---
 title: YouTube and X
-description: How Very Good AdBlock handles YouTube video ads and X/Twitter promoted content.
+description: How Very Good AdBlock handles YouTube video ads and X/Twitter promoted content with resilient, minimal cleanup.
 ---
 
 # YouTube and X
 
-YouTube and X/Twitter are handled with site-specific content cleanup on top of normal DNR blocking.
+YouTube and X/Twitter are handled with site-specific, minimal content cleanup on top of normal DNR blocking.
 
 ## YouTube
 

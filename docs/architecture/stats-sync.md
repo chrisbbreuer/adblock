@@ -1,6 +1,6 @@
 ---
 title: Stats and Cloud Sync
-description: Local-first tracking with compact Chrome sync restore.
+description: Local-first tracking with compact Chrome sync restore for modern cross-install stats.
 ---
 
 # Stats and Cloud Sync
