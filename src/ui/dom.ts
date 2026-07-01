@@ -1,5 +1,10 @@
 import type { RuntimeMessage, RuntimeResponse } from '../shared/types'
 
+export interface BarRenderOptions {
+  interactive?: boolean
+  valueLabel?: (value: number, index: number) => string
+}
+
 export function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id)
   if (!element) throw new Error(`Missing #${id}`)
@@ -12,27 +17,34 @@ export async function sendMessage<T>(message: RuntimeMessage): Promise<T> {
   return response.data as T
 }
 
-export function renderBars(element: HTMLElement, values: number[], limit: number): void {
+export function renderBars(element: HTMLElement, values: number[], limit: number, options: BarRenderOptions = {}): void {
   const max = Math.max(1, ...values)
   const fragment = document.createDocumentFragment()
   const start = Math.max(0, values.length - limit)
   const padding = Math.max(0, limit - (values.length - start))
 
   for (let index = 0; index < padding; index++) {
-    fragment.append(barElement(0, max))
+    fragment.append(barElement(0, max, index, options))
   }
 
   for (let index = start; index < values.length; index++) {
-    fragment.append(barElement(values[index], max))
+    fragment.append(barElement(values[index], max, padding + index - start, options))
   }
 
   element.replaceChildren(fragment)
 }
 
-function barElement(value: number, max: number): HTMLSpanElement {
+function barElement(value: number, max: number, index: number, options: BarRenderOptions): HTMLSpanElement {
   const bar = document.createElement('span')
   bar.style.height = `${Math.max(6, Math.round((value / max) * 100))}%`
-  bar.title = `${value} blocked`
+  const label = options.valueLabel?.(value, index) ?? `${value.toLocaleString()} blocked`
+  bar.title = label
+  bar.dataset.tooltip = label
+  bar.setAttribute('aria-label', label)
+  if (options.interactive) {
+    bar.tabIndex = 0
+    bar.role = 'listitem'
+  }
   return bar
 }
 

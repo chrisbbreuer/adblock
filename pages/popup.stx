@@ -39,22 +39,44 @@
       <section class="timeline-card">
         <div class="section-heading">
           <span>Last 24 hours</span>
+          <strong id="chart-peak">0 peak</strong>
+        </div>
+        <div id="hourly-chart" class="bar-chart" role="list" aria-label="Blocked ads by hour"></div>
+        <div class="timeline-footer">
+          <span>older</span>
           <strong id="lifetime-blocked">0 lifetime</strong>
+          <span>now</span>
         </div>
-        <div id="hourly-chart" class="bar-chart" aria-hidden="true"></div>
       </section>
 
-      <section class="site-card">
-        <div>
-          <span class="muted">Current site</span>
-          <strong id="current-site">No active tab</strong>
+      <section class="site-card current-site-card">
+        <div class="site-card-top">
+          <div>
+            <span class="muted">Current site</span>
+            <strong id="current-site">No active tab</strong>
+          </div>
+          <button id="site-toggle" class="soft-button" type="button">Allow</button>
         </div>
-        <button id="site-toggle" class="soft-button" type="button">Allow</button>
+        <div id="current-site-stats" class="site-stat-grid" aria-label="Current site statistics">
+          <article>
+            <span>Blocked here</span>
+            <strong id="site-blocked">0</strong>
+          </article>
+          <article>
+            <span>Data here</span>
+            <strong id="site-data">0 KB</strong>
+          </article>
+          <article>
+            <span>Video here</span>
+            <strong id="site-video">0 min</strong>
+          </article>
+        </div>
+        <p id="site-last-activity" class="site-footnote">No current-site events yet.</p>
       </section>
 
-      <section class="category-list" aria-label="Top blocked categories">
+      <section class="category-list" aria-label="Top blocked sources">
         <div class="section-heading">
-          <span>Top categories</span>
+          <span>Top sources</span>
           <button id="open-options" class="icon-button" type="button" aria-label="Open dashboard">↗</button>
         </div>
         <div id="top-categories"></div>

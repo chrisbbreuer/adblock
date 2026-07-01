@@ -11,9 +11,14 @@ const elements = {
   dataSaved: byId('data-saved'),
   videoTime: byId('video-time'),
   lifetimeBlocked: byId('lifetime-blocked'),
+  chartPeak: byId('chart-peak'),
   hourlyChart: byId('hourly-chart'),
   currentSite: byId('current-site'),
   siteToggle: byId<HTMLButtonElement>('site-toggle'),
+  siteBlocked: byId('site-blocked'),
+  siteData: byId('site-data'),
+  siteVideo: byId('site-video'),
+  siteLastActivity: byId('site-last-activity'),
   topCategories: byId('top-categories'),
   status: byId('status-message'),
   openOptions: byId<HTMLButtonElement>('open-options'),
@@ -56,6 +61,7 @@ function render(next: DashboardState): void {
   const active = next.activeTab
   const enabled = next.settings.enabled
   const allowed = active ? siteMatches(active.hostname, next.settings.allowedSites) : false
+  const hourlyValues = next.local.hourly.map(bucket => bucket.adsBlocked)
 
   elements.root.dataset.view = 'ready'
   elements.root.dataset.enabled = String(enabled && !allowed)
@@ -64,19 +70,46 @@ function render(next: DashboardState): void {
   elements.dataSaved.textContent = formatBytes(next.lifetime.bytesSaved)
   elements.videoTime.textContent = formatMinutes(next.lifetime.videoSecondsSaved)
   elements.lifetimeBlocked.textContent = `${next.lifetime.adsBlocked.toLocaleString()} lifetime`
+  elements.chartPeak.textContent = `${Math.max(0, ...hourlyValues).toLocaleString()} peak`
   elements.currentSite.textContent = active?.hostname || 'No active tab'
   elements.siteToggle.textContent = allowed ? 'Protect' : 'Allow'
   elements.siteToggle.disabled = !active
   elements.protectionToggle.classList.toggle('off', !enabled)
-  elements.status.textContent = allowed ? 'This site is allowed. Global protection remains available elsewhere.' : 'Estimated savings are computed locally.'
+  elements.status.textContent = allowed ? 'This site is allowed. Global protection remains available elsewhere.' : 'Network blocking is active. Estimates are computed locally.'
 
-  renderBars(elements.hourlyChart, next.local.hourly.map(bucket => bucket.adsBlocked), 24)
+  renderBars(elements.hourlyChart, hourlyValues, 24, {
+    interactive: true,
+    valueLabel: (value, index) => `${hourLabel(index)}: ${value.toLocaleString()} blocked`,
+  })
+  renderCurrentSiteStats(next)
   renderTopCategories(next)
+}
+
+function renderCurrentSiteStats(next: DashboardState): void {
+  const active = next.activeTab
+  const site = active ? siteStatsFor(next, active.hostname) : undefined
+
+  elements.siteBlocked.textContent = (site?.adsBlocked ?? 0).toLocaleString()
+  elements.siteData.textContent = formatBytes(site?.bytesSaved ?? 0)
+  elements.siteVideo.textContent = formatMinutes(site?.videoSecondsSaved ?? 0)
+
+  const title = active
+    ? `${active.hostname}: ${(site?.adsBlocked ?? 0).toLocaleString()} blocked, ${formatBytes(site?.bytesSaved ?? 0)} saved, ${formatMinutes(site?.videoSecondsSaved ?? 0)} video time`
+    : 'No active tab'
+
+  for (const element of [elements.siteBlocked, elements.siteData, elements.siteVideo]) {
+    element.title = title
+  }
+
+  elements.siteLastActivity.textContent = site?.lastBlockedAt
+    ? `Last blocked here ${relativeTime(site.lastBlockedAt)}`
+    : active ? 'No blocked events recorded for this site yet.' : 'Open a site to see per-site stats.'
 }
 
 function renderTopCategories(next: DashboardState): void {
   const categories = Object.entries(next.local.recentEvents.reduce<Record<string, number>>((totals, event) => {
-    const key = event.source === 'video' ? 'video ads' : event.source
+    const key = sourceLabel(String(event.source))
+    if (!key) return totals
     totals[key] = (totals[key] ?? 0) + event.count
     return totals
   }, {}))
@@ -96,6 +129,38 @@ function renderTopCategories(next: DashboardState): void {
       return row
     }),
   )
+}
+
+function siteStatsFor(next: DashboardState, hostname: string): DashboardState['local']['sites'][string] | undefined {
+  return next.local.sites[hostname]
+    ?? Object.values(next.local.sites).find(site => siteMatches(hostname, [site.hostname]))
+}
+
+function sourceLabel(source: string): string | undefined {
+  if (source === 'dnr') return 'Network rules'
+  if (source === 'video') return 'Video skips'
+  if (source === 'twitch') return 'Twitch markers'
+  if (source === 'manual') return 'Manual rules'
+  return undefined
+}
+
+function hourLabel(index: number): string {
+  const hoursAgo = 23 - index
+  if (hoursAgo <= 0) return 'This hour'
+  if (hoursAgo === 1) return '1 hour ago'
+  return `${hoursAgo} hours ago`
+}
+
+function relativeTime(value: string): string {
+  const date = new Date(value)
+  const diffMs = Date.now() - date.getTime()
+  if (!Number.isFinite(diffMs)) return 'recently'
+  const minutes = Math.max(0, Math.round(diffMs / 60_000))
+  if (minutes < 1) return 'just now'
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `${hours}h ago`
+  return `${Math.round(hours / 24)}d ago`
 }
 
 function emptyRow(text: string): HTMLElement {
