@@ -99,12 +99,12 @@
           <article>
             <span class="feature-icon video" aria-hidden="true"></span>
             <h3>YouTube and Twitch helpers</h3>
-            <p>Clicks available YouTube skip controls and detects Twitch video-ad markers without broad cosmetic DOM hiding.</p>
+            <p>Hides YouTube feed, masthead, and display ads, clicks available skip controls, and detects Twitch video-ad markers — without ever touching the player or real videos.</p>
           </article>
           <article>
             <span class="feature-icon social" aria-hidden="true"></span>
             <h3>Social ad blocking</h3>
-            <p>Blocks known promoted-content and ad request paths through MV3 rules while avoiding fragile feed DOM removal.</p>
+            <p>Blocks known promoted-content and ad request paths through MV3 rules, plus site-specific cosmetic hiding for promoted feed entries.</p>
           </article>
           <article>
             <span class="feature-icon control" aria-hidden="true"></span>
@@ -154,7 +154,7 @@
         </div>
         <div class="privacy-list">
           <div><span></span>Chrome MV3 declarativeNetRequest</div>
-          <div><span></span>No cosmetic DOM hiding in v1</div>
+          <div><span></span>Site-specific cosmetic hiding, kill switch included</div>
           <div><span></span>Local and sync storage split</div>
           <div><span></span>Exportable stats and reset controls</div>
         </div>

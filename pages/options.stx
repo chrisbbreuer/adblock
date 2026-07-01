@@ -61,6 +61,14 @@
             <input id="setting-enabled" type="checkbox">
           </label>
           <label class="toggle-row">
+            <span>Hide ad placements</span>
+            <input id="setting-cosmetic" type="checkbox">
+          </label>
+          <label class="toggle-row">
+            <span>Aggressive hiding</span>
+            <input id="setting-aggressive" type="checkbox">
+          </label>
+          <label class="toggle-row">
             <span>YouTube skip assist</span>
             <input id="setting-youtube" type="checkbox">
           </label>
@@ -104,6 +112,14 @@
             <strong>Local only</strong>
           </div>
           <div id="diagnostics" class="diagnostics"></div>
+        </article>
+
+        <article class="glass-panel dashboard-panel">
+          <div class="section-heading">
+            <span>Cosmetic activity</span>
+            <strong id="cosmetic-status">Active tab</strong>
+          </div>
+          <div id="cosmetic-selectors" class="diagnostics"></div>
         </article>
       </section>
 

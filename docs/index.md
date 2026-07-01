@@ -17,7 +17,7 @@ features:
   - title: MV3 Native Blocking
     details: Uses Chrome declarativeNetRequest static rules plus dynamic per-site rules for allowlists and manual blocks.
   - title: YouTube and Twitch Helpers
-    details: Content scripts click exposed YouTube skip buttons and detect Twitch video-ad markers without broad cosmetic DOM hiding.
+    details: Content scripts hide first-party ad placements with site-specific cosmetic filtering, click exposed YouTube skip buttons, and detect Twitch video-ad markers.
   - title: Stats That Follow You
     details: Lifetime totals and compact history sync through Chrome so fresh installs can restore your dashboard.
   - title: Local by Default

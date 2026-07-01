@@ -16,7 +16,7 @@ import {
   resetStats,
   setSettings,
 } from '../shared/storage'
-import type { DashboardState, DnrTelemetry, ExtensionSettings, RuntimeMessage, RuntimeResponse } from '../shared/types'
+import type { CosmeticTelemetry, DashboardState, DnrTelemetry, ExtensionSettings, RuntimeMessage, RuntimeResponse } from '../shared/types'
 
 const staticRuleCount = curatedRuleSeeds.length + generatedNetworkHosts.hosts.length
 const filterSources = generatedNetworkHosts.sources.map(source => ({
@@ -26,6 +26,8 @@ const filterSources = generatedNetworkHosts.sources.map(source => ({
   sha256: source.sha256,
 }))
 const pageBadgeStats = new Map<number, { blocked: number, url?: string }>()
+const cosmeticActivity = new Map<number, Map<string, number>>()
+const maxCosmeticSelectors = 24
 
 chrome.runtime.onInstalled.addListener(() => {
   void setup()
@@ -53,6 +55,7 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'loading' || changeInfo.url) {
     pageBadgeStats.set(tabId, { blocked: 0, url: changeInfo.url ?? tab.url })
+    cosmeticActivity.delete(tabId)
     void updateBadge(tabId)
   }
 
@@ -63,6 +66,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   pageBadgeStats.delete(tabId)
+  cosmeticActivity.delete(tabId)
 })
 
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
@@ -116,6 +120,10 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       await updateBadge(sender.tab?.id)
       return true
     }
+    case 'record-cosmetic': {
+      if (sender.tab?.id !== undefined) recordCosmeticActivity(sender.tab.id, message.hits)
+      return true
+    }
     case 'reset-stats':
       await resetStats()
       await updateBadge()
@@ -144,6 +152,7 @@ async function getDashboard(): Promise<DashboardState> {
     },
     activeTab,
     dnr: await getDnrTelemetry(activeTab?.tabId),
+    cosmetic: getCosmeticTelemetry(settings, activeTab?.tabId),
     filters: {
       staticRuleCount,
       generatedHostRules: generatedNetworkHosts.totalHosts,
@@ -234,6 +243,31 @@ async function updateBadge(tabId?: number): Promise<void> {
       site ? `${site.adsBlocked.toLocaleString()} total for ${hostname}, about ${formatBytes(site.bytesSaved)} saved.` : undefined,
     ].filter(Boolean).join(' '),
   })
+}
+
+function recordCosmeticActivity(tabId: number, hits: Array<{ selector: string, count: number }>): void {
+  if (!hits.length) return
+  const perTab = cosmeticActivity.get(tabId) ?? new Map<string, number>()
+  for (const hit of hits) {
+    if (!hit.selector || hit.count <= 0) continue
+    perTab.set(hit.selector, (perTab.get(hit.selector) ?? 0) + hit.count)
+  }
+  cosmeticActivity.set(tabId, perTab)
+}
+
+function getCosmeticTelemetry(settings: ExtensionSettings, activeTabId?: number): CosmeticTelemetry {
+  const perTab = activeTabId === undefined ? undefined : cosmeticActivity.get(activeTabId)
+  const selectors = [...(perTab?.entries() ?? [])]
+    .map(([selector, count]) => ({ selector, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, maxCosmeticSelectors)
+
+  return {
+    enabled: settings.cosmeticFiltering,
+    aggressive: settings.aggressiveCosmetic,
+    activeTabHidden: selectors.reduce((total, hit) => total + hit.count, 0),
+    activeTabSelectors: selectors,
+  }
 }
 
 function incrementPageBadge(tabId: number, count: number, url?: string): void {

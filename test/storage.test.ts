@@ -93,13 +93,14 @@ describe('cloud stats sync', () => {
     expect(merged.lastUpdated).toBe('2026-06-20T00:00:00.000Z')
   })
 
-  it('drops legacy cosmetic and X settings from sync storage', async () => {
+  it('keeps cosmetic settings but drops legacy X settings from sync storage', async () => {
     const originalChrome = globalThis.chrome
     const store: Record<string, unknown> = {
       settings: {
         enabled: true,
         badgeEnabled: true,
-        cosmeticFiltering: true,
+        cosmeticFiltering: false,
+        aggressiveCosmetic: true,
         youtubeEnhancements: true,
         twitchEnhancements: true,
         xEnhancements: true,
@@ -126,12 +127,14 @@ describe('cloud stats sync', () => {
 
     try {
       const settings = await getSettings()
-      expect('cosmeticFiltering' in settings).toBe(false)
+      expect(settings.cosmeticFiltering).toBe(false)
+      expect(settings.aggressiveCosmetic).toBe(true)
       expect('xEnhancements' in settings).toBe(false)
 
       await setSettings({ youtubeEnhancements: false })
       const persisted = store.settings as Record<string, unknown>
-      expect(persisted.cosmeticFiltering).toBeUndefined()
+      expect(persisted.cosmeticFiltering).toBe(false)
+      expect(persisted.aggressiveCosmetic).toBe(true)
       expect(persisted.xEnhancements).toBeUndefined()
       expect(persisted.youtubeEnhancements).toBe(false)
     }

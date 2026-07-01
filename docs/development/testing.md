@@ -34,7 +34,7 @@ The smoke test uses Bun WebView. It checks:
 
 - YouTube watch pages and Shorts skip assist.
 - YouTube skip-button automation.
-- No cosmetic DOM hiding on YouTube or Twitch fixtures.
+- Cosmetic hiding of YouTube feed/masthead/display ads and Twitch display banners, with real feed videos and video-ad markers left visible.
 - Twitch video-ad marker detection and estimated saved-time events.
 - Popup and options dashboard rendering.
 - Reset/export controls.

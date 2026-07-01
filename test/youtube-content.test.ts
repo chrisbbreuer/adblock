@@ -7,7 +7,7 @@ import type { BlockEvent } from '../src/shared/types'
 const fixturePath = new URL('./fixtures/youtube-watch.cached.html', import.meta.url)
 
 describe('cached YouTube content script fixture', () => {
-  it('clicks nested video ad skip buttons without hiding page containers', async () => {
+  it('hides feed and display ads while keeping real videos, comments, and playback', async () => {
     const contentScript = await buildContentScript()
     const fixture = await Bun.file(fixturePath).text()
     const page = wrapFixture(fixture, contentScript)
@@ -55,15 +55,31 @@ describe('cached YouTube content script fixture', () => {
       await view.navigate(`https://www.youtube.com:${server.port}/watch?v=adblock-fixture`)
       await waitFor(view, `document.body.dataset.skipped === 'true'`, 'skip button click')
       await waitFor(view, `(window.__adblockEvents?.length ?? 0) > 0`, 'batched event flush')
+      await waitFor(view, `getComputedStyle(document.querySelector('#feed-ad')).display === 'none'`, 'feed ad hidden')
 
       const hiddenCount = await view.evaluate<number>(`document.querySelectorAll('[data-adblock-hidden="true"]').length`)
       const events = await view.evaluate<BlockEvent[]>(`window.__adblockEvents ?? []`)
       const eventSources = new Set(events.map(event => event.source))
       const videoSecondsSaved = events.reduce((total, event) => total + (event.videoSecondsSaved ?? 0), 0)
 
+      const isHidden = (selector: string): Promise<boolean> =>
+        view.evaluate<boolean>(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); return el ? getComputedStyle(el).display === 'none' : null })()`)
+
+      // Ads must be gone.
+      expect(await isHidden('#masthead-ad')).toBe(true)
+      expect(await isHidden('#feed-ad')).toBe(true)
+      expect(await isHidden('ytd-display-ad-renderer')).toBe(true)
+
+      // Real content must remain fully visible.
+      expect(await isHidden('#feed-video')).toBe(false)
+      expect(await isHidden('ytd-comment-thread-renderer')).toBe(false)
+      expect(await isHidden('video.html5-main-video')).toBe(false)
+      expect(await isHidden('.ytp-ad-skip-button')).toBe(false)
+
       expect(errors).toEqual([])
-      expect(hiddenCount).toBe(0)
+      expect(hiddenCount).toBeGreaterThanOrEqual(6)
       expect(eventSources.has('video')).toBe(true)
+      expect(eventSources.has('youtube')).toBe(true)
       expect(videoSecondsSaved).toBeGreaterThanOrEqual(15)
     }
     finally {
@@ -107,6 +123,8 @@ function wrapFixture(fixture: string, contentScript: string): string {
                 settings: {
                   enabled: true,
                   badgeEnabled: true,
+                  cosmeticFiltering: true,
+                  aggressiveCosmetic: false,
                   youtubeEnhancements: true,
                   twitchEnhancements: true,
                   allowedSites: [],

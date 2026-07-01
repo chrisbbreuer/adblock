@@ -1,10 +1,12 @@
 export type ResourceCategory = 'document' | 'script' | 'image' | 'media' | 'stylesheet' | 'xhr' | 'font' | 'other'
 
-export type BlockSource = 'dnr' | 'twitch' | 'video' | 'manual'
+export type BlockSource = 'dnr' | 'twitch' | 'video' | 'manual' | 'cosmetic' | 'youtube' | 'x'
 
 export interface ExtensionSettings {
   enabled: boolean
   badgeEnabled: boolean
+  cosmeticFiltering: boolean
+  aggressiveCosmetic: boolean
   youtubeEnhancements: boolean
   twitchEnhancements: boolean
   allowedSites: string[]
@@ -73,8 +75,21 @@ export interface DashboardState {
   cloudSync: CloudSyncState
   activeTab?: ActiveTabState
   dnr: DnrTelemetry
+  cosmetic: CosmeticTelemetry
   filters: FilterMetadata
   manifestVersion: string
+}
+
+export interface CosmeticSelectorHit {
+  selector: string
+  count: number
+}
+
+export interface CosmeticTelemetry {
+  enabled: boolean
+  aggressive: boolean
+  activeTabHidden: number
+  activeTabSelectors: CosmeticSelectorHit[]
 }
 
 export interface DnrTelemetry {
@@ -110,6 +125,7 @@ export type RuntimeMessage =
   | { type: 'set-settings', settings: Partial<ExtensionSettings> }
   | { type: 'toggle-site', hostname: string, allowed: boolean }
   | { type: 'record-blocks', events: BlockEvent[] }
+  | { type: 'record-cosmetic', hostname: string, hits: CosmeticSelectorHit[] }
   | { type: 'reset-stats' }
   | { type: 'export-data' }
 

@@ -15,12 +15,12 @@ Very Good AdBlock exists because I was tired of running into new popups, intrusi
 - Twitch video-ad marker detection for estimated saved-time stats.
 - Local-first stats for blocked ads, estimated data saved, and estimated video time saved, with compact Chrome cloud sync for fresh installs.
 - Premium, minimal STX popup and dashboard UI with external scripts for MV3 CSP safety.
-- Performance-conscious content scripts with throttled observers and no cosmetic DOM hiding.
+- Performance-conscious content scripts with throttled observers and site-specific cosmetic hiding for first-party ad placements.
 - Bun WebView smoke coverage for UI rendering, screenshots, video helpers, and overflow checks.
 
-## Deferred
+## Cosmetic Filtering
 
-Cosmetic filtering is intentionally disabled for now. YouTube layout and playback changes made broad DOM hiding too risky, so the next implementation should ship behind focused tests, site-specific guardrails, and quick rollback controls.
+Cosmetic filtering hides first-party ad placements that survive network blocking (YouTube feed/masthead/display ads, Twitch display banners, X promoted entries). It ships on by default behind site-specific selectors, global and per-site kill switches, a narrow default set with an opt-in aggressive tier, and per-page diagnostics. The player region is never hidden, so skip automation and playback are untouched. See `docs/architecture/cosmetic-filtering.md`.
 
 ## Setup
 

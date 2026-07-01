@@ -10,9 +10,13 @@ const elements = {
   version: byId('dashboard-version'),
   dailyChart: byId('daily-chart'),
   enabled: byId<HTMLInputElement>('setting-enabled'),
+  cosmetic: byId<HTMLInputElement>('setting-cosmetic'),
+  aggressive: byId<HTMLInputElement>('setting-aggressive'),
   youtube: byId<HTMLInputElement>('setting-youtube'),
   twitch: byId<HTMLInputElement>('setting-twitch'),
   badge: byId<HTMLInputElement>('setting-badge'),
+  cosmeticStatus: byId('cosmetic-status'),
+  cosmeticSelectors: byId('cosmetic-selectors'),
   rulesStatus: byId('rules-status'),
   allowedCount: byId('allowed-count'),
   allowForm: byId<HTMLFormElement>('allow-form'),
@@ -34,6 +38,8 @@ void refresh()
 
 for (const [key, input] of Object.entries({
   enabled: elements.enabled,
+  cosmeticFiltering: elements.cosmetic,
+  aggressiveCosmetic: elements.aggressive,
   youtubeEnhancements: elements.youtube,
   twitchEnhancements: elements.twitch,
   badgeEnabled: elements.badge,
@@ -92,6 +98,9 @@ function render(next: DashboardState): void {
   elements.video.textContent = formatMinutes(next.lifetime.videoSecondsSaved)
   elements.version.textContent = next.manifestVersion
   elements.enabled.checked = next.settings.enabled
+  elements.cosmetic.checked = next.settings.cosmeticFiltering
+  elements.aggressive.checked = next.settings.aggressiveCosmetic
+  elements.aggressive.disabled = !next.settings.cosmeticFiltering
   elements.youtube.checked = next.settings.youtubeEnhancements
   elements.twitch.checked = next.settings.twitchEnhancements
   elements.badge.checked = next.settings.badgeEnabled
@@ -104,6 +113,39 @@ function render(next: DashboardState): void {
   renderAllowedSites(next)
   renderBlockedSites(next)
   renderDiagnostics(next)
+  renderCosmeticActivity(next)
+}
+
+function renderCosmeticActivity(next: DashboardState): void {
+  const cosmetic = next.cosmetic
+  if (!cosmetic?.enabled) {
+    elements.cosmeticStatus.textContent = 'Disabled'
+    elements.cosmeticSelectors.replaceChildren(diagnosticRow('Cosmetic filtering', 'Off'))
+    return
+  }
+
+  elements.cosmeticStatus.textContent = cosmetic.aggressive ? 'Aggressive' : 'Active tab'
+
+  if (!cosmetic.activeTabSelectors.length) {
+    elements.cosmeticSelectors.replaceChildren(diagnosticRow('Hidden here', String(cosmetic.activeTabHidden)))
+    return
+  }
+
+  elements.cosmeticSelectors.replaceChildren(
+    diagnosticRow('Hidden here', String(cosmetic.activeTabHidden)),
+    ...cosmetic.activeTabSelectors.map(hit => diagnosticRow(hit.selector, String(hit.count))),
+  )
+}
+
+function diagnosticRow(label: string, value: string): HTMLElement {
+  const row = document.createElement('div')
+  row.className = 'diagnostic-row'
+  const labelElement = document.createElement('span')
+  const valueElement = document.createElement('strong')
+  labelElement.textContent = label
+  valueElement.textContent = value
+  row.replaceChildren(labelElement, valueElement)
+  return row
 }
 
 function renderAllowedSites(next: DashboardState): void {

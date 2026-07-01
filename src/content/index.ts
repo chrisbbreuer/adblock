@@ -1,4 +1,6 @@
 import { twitchVideoAdMarkers } from '../shared/constants'
+import { activeCosmeticGroups } from '../shared/cosmetic'
+import type { ActiveCosmeticGroup, CosmeticContext } from '../shared/cosmetic'
 import { hostnameFromUrl, siteMatches } from '../shared/domain'
 import { estimateBytesSaved, estimateVideoSecondsSaved } from '../shared/metrics'
 import { defaultSettings } from '../shared/storage'
@@ -8,10 +10,13 @@ const hostname = hostnameFromUrl(location.href)
 const seen = new WeakSet<Element>()
 const videoMarkersSeen = new WeakSet<Element>()
 const pending = new Map<string, BlockEvent>()
+const selectorHits = new Map<string, number>()
 const pendingRoots = new Set<Element>()
+const styleId = 'very-good-adblock-cosmetics'
 const mutationSweepDelayMs = 150
 const eventFlushDelayMs = 1_000
 const maxPendingRoots = 80
+let cosmeticGroups: ActiveCosmeticGroup[] = []
 let observer: MutationObserver | undefined
 let sweepTimer: number | undefined
 let eventFlushTimer: number | undefined
@@ -22,6 +27,11 @@ void boot()
 async function boot(): Promise<void> {
   const settings = await loadSettings()
   if (!settings.enabled || siteMatches(hostname, settings.allowedSites)) return
+
+  if (settings.cosmeticFiltering) {
+    cosmeticGroups = activeCosmeticGroups(cosmeticContext(settings))
+    injectCosmeticStyle(cosmeticGroups)
+  }
 
   sweep(settings, [document])
   observer = new MutationObserver(mutations => scheduleSweep(settings, mutations))
@@ -36,11 +46,37 @@ async function boot(): Promise<void> {
 async function loadSettings(): Promise<ExtensionSettings> {
   try {
     const response = await chrome.runtime.sendMessage({ type: 'get-dashboard' }) as RuntimeResponse<{ settings: ExtensionSettings }>
-    return response.ok && response.data ? response.data.settings : defaultSettings
+    return response.ok && response.data ? { ...defaultSettings, ...response.data.settings } : defaultSettings
   }
   catch {
     return defaultSettings
   }
+}
+
+function cosmeticContext(settings: ExtensionSettings): CosmeticContext {
+  return {
+    isYouTube: isYouTube(),
+    isTwitch: isTwitch(),
+    isX: isX(),
+    youtubeEnhancements: settings.youtubeEnhancements,
+    twitchEnhancements: settings.twitchEnhancements,
+    aggressive: settings.aggressiveCosmetic,
+  }
+}
+
+/**
+ * Hide matched placements up front with a single stylesheet. CSS applies to
+ * elements added later by YouTube's SPA without waiting for a mutation sweep,
+ * so feed ads never flash in. The sweep below only counts what the CSS hides.
+ */
+function injectCosmeticStyle(groups: readonly ActiveCosmeticGroup[]): void {
+  const selectors = [...new Set(groups.flatMap(group => group.selectors))]
+  if (!selectors.length || document.getElementById(styleId)) return
+
+  const style = document.createElement('style')
+  style.id = styleId
+  style.textContent = `${selectors.join(',\n')} { display: none !important; }`
+  ;(document.head ?? document.documentElement).append(style)
 }
 
 function scheduleSweep(settings: ExtensionSettings, mutations: MutationRecord[]): void {
@@ -56,6 +92,8 @@ function scheduleSweep(settings: ExtensionSettings, mutations: MutationRecord[])
 function sweep(settings: ExtensionSettings, roots: readonly SelectorRoot[]): void {
   if (!roots.length) return
 
+  if (settings.cosmeticFiltering && cosmeticGroups.length) countHiddenPlacements(roots)
+
   if (settings.youtubeEnhancements && isYouTube()) {
     clickYouTubeSkip(roots)
   }
@@ -68,6 +106,27 @@ function sweep(settings: ExtensionSettings, roots: readonly SelectorRoot[]): voi
 }
 
 type SelectorRoot = Document | Element
+
+/**
+ * Tag and count elements the cosmetic stylesheet is hiding. Hiding already
+ * happened via CSS; this only attributes each newly-matched node to its
+ * selector for per-page diagnostics and the blocked-count metric.
+ */
+function countHiddenPlacements(roots: readonly SelectorRoot[]): void {
+  for (const group of cosmeticGroups) {
+    for (const selector of group.selectors) {
+      for (const root of roots) {
+        for (const element of queryAllSafe(root, selector)) {
+          if (seen.has(element)) continue
+          seen.add(element)
+          element.setAttribute('data-adblock-hidden', 'true')
+          selectorHits.set(selector, (selectorHits.get(selector) ?? 0) + 1)
+          queueEvent(group.source, group.category)
+        }
+      }
+    }
+  }
+}
 
 function clickYouTubeSkip(roots: readonly SelectorRoot[]): void {
   for (const root of roots) {
@@ -156,7 +215,8 @@ function drainScanRoots(): SelectorRoot[] {
 }
 
 function scheduleEventFlush(): void {
-  if (!pending.size || eventFlushTimer) return
+  if (eventFlushTimer) return
+  if (!pending.size && !selectorHits.size) return
   eventFlushTimer = window.setTimeout(() => {
     eventFlushTimer = undefined
     flushEvents()
@@ -169,10 +229,17 @@ function flushEvents(): void {
     eventFlushTimer = undefined
   }
 
-  if (!pending.size) return
-  const events = [...pending.values()]
-  pending.clear()
-  void chrome.runtime.sendMessage({ type: 'record-blocks', events })
+  if (pending.size) {
+    const events = [...pending.values()]
+    pending.clear()
+    void chrome.runtime.sendMessage({ type: 'record-blocks', events })
+  }
+
+  if (selectorHits.size) {
+    const hits = [...selectorHits.entries()].map(([selector, count]) => ({ selector, count }))
+    selectorHits.clear()
+    void chrome.runtime.sendMessage({ type: 'record-cosmetic', hostname, hits })
+  }
 }
 
 function isYouTube(): boolean {
@@ -181,4 +248,8 @@ function isYouTube(): boolean {
 
 function isTwitch(): boolean {
   return hostname === 'twitch.tv' || hostname.endsWith('.twitch.tv')
+}
+
+function isX(): boolean {
+  return hostname === 'x.com' || hostname.endsWith('.x.com') || hostname === 'twitter.com' || hostname.endsWith('.twitter.com')
 }

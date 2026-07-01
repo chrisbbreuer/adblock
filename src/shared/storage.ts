@@ -20,6 +20,8 @@ const cloudSiteRollupLimit = 20
 export const defaultSettings: ExtensionSettings = {
   enabled: true,
   badgeEnabled: true,
+  cosmeticFiltering: true,
+  aggressiveCosmetic: false,
   youtubeEnhancements: true,
   twitchEnhancements: true,
   allowedSites: [],
@@ -197,6 +199,8 @@ function normalizeSettings(value: unknown): ExtensionSettings {
   return {
     enabled: settings?.enabled ?? defaultSettings.enabled,
     badgeEnabled: settings?.badgeEnabled ?? defaultSettings.badgeEnabled,
+    cosmeticFiltering: settings?.cosmeticFiltering ?? defaultSettings.cosmeticFiltering,
+    aggressiveCosmetic: settings?.aggressiveCosmetic ?? defaultSettings.aggressiveCosmetic,
     youtubeEnhancements: settings?.youtubeEnhancements ?? defaultSettings.youtubeEnhancements,
     twitchEnhancements: settings?.twitchEnhancements ?? defaultSettings.twitchEnhancements,
     allowedSites: Array.isArray(settings?.allowedSites) ? settings.allowedSites : defaultSettings.allowedSites,

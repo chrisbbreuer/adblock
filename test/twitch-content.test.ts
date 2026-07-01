@@ -5,7 +5,7 @@ import { describe, expect, it } from 'bun:test'
 import type { BlockEvent } from '../src/shared/types'
 
 describe('cached Twitch content script fixture', () => {
-  it('records Twitch video ad markers without hiding page containers', async () => {
+  it('hides Twitch display banners but keeps video-ad markers for detection', async () => {
     const contentScript = await buildContentScript()
     const page = wrapFixture(twitchFixture(), contentScript)
     const certDir = await mkdtemp(join(tmpdir(), 'adblock-twitch-test-'))
@@ -51,15 +51,29 @@ describe('cached Twitch content script fixture', () => {
     try {
       await view.navigate(`https://www.twitch.tv:${server.port}/streamer`)
       await waitFor(view, `(window.__adblockEvents?.length ?? 0) > 0`, 'batched event flush')
+      await waitFor(view, `getComputedStyle(document.querySelector('.stream-display-ad__container')).display === 'none'`, 'display ad hidden')
 
       const hiddenCount = await view.evaluate<number>(`document.querySelectorAll('[data-adblock-hidden="true"]').length`)
       const events = await view.evaluate<BlockEvent[]>(`window.__adblockEvents ?? []`)
       const eventSources = new Set(events.map(event => event.source))
       const videoSecondsSaved = events.reduce((total, event) => total + (event.videoSecondsSaved ?? 0), 0)
 
+      const isHidden = (selector: string): Promise<boolean | null> =>
+        view.evaluate<boolean | null>(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); return el ? getComputedStyle(el).display === 'none' : null })()`)
+
+      // The display banner ad is hidden.
+      expect(await isHidden('.stream-display-ad__container')).toBe(true)
+
+      // Video-ad markers stay visible — the ad IS the stream, so we only detect them.
+      expect(await isHidden('.player-ad-notice')).toBe(false)
+      expect(await isHidden('.commercial-break-in-progress')).toBe(false)
+      expect(await isHidden('[data-a-target="video-ad-label"]')).toBe(false)
+      expect(await view.evaluate<boolean>(`document.querySelector('.player-ad-notice')?.hasAttribute('data-adblock-hidden') ?? true`)).toBe(false)
+
       expect(errors).toEqual([])
-      expect(hiddenCount).toBe(0)
+      expect(hiddenCount).toBeGreaterThanOrEqual(1)
       expect(eventSources.has('video')).toBe(true)
+      expect(eventSources.has('twitch')).toBe(true)
       expect(videoSecondsSaved).toBeGreaterThanOrEqual(15)
     }
     finally {
@@ -125,6 +139,8 @@ function wrapFixture(fixture: string, contentScript: string): string {
                 settings: {
                   enabled: true,
                   badgeEnabled: true,
+                  cosmeticFiltering: true,
+                  aggressiveCosmetic: false,
                   youtubeEnhancements: true,
                   twitchEnhancements: true,
                   allowedSites: [],

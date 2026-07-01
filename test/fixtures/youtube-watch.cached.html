@@ -27,6 +27,7 @@
   </head>
   <body>
     <ytd-app>
+      <div id="masthead-ad">Masthead banner ad</div>
       <ytd-watch-flexy video-id="adblock-fixture">
         <div id="player" class="style-scope ytd-watch-flexy">
           <div id="movie_player" class="ad-showing html5-video-player">
@@ -46,10 +47,22 @@
           <ytd-promoted-sparkles-web-renderer>Promoted sparkle</ytd-promoted-sparkles-web-renderer>
           <ytd-companion-slot-renderer>Companion ad</ytd-companion-slot-renderer>
           <ytd-ad-slot-renderer>Inline slot ad</ytd-ad-slot-renderer>
-          <ytd-rich-item-renderer>
-            <ytd-ad-slot-renderer>Rich shelf ad</ytd-ad-slot-renderer>
-          </ytd-rich-item-renderer>
+          <div id="comments">
+            <ytd-comment-thread-renderer>A real viewer comment</ytd-comment-thread-renderer>
+          </div>
         </div>
+        <ytd-rich-grid-renderer>
+          <ytd-rich-item-renderer id="feed-ad">
+            <div id="content">
+              <ytd-ad-slot-renderer>In-feed sponsored card</ytd-ad-slot-renderer>
+            </div>
+          </ytd-rich-item-renderer>
+          <ytd-rich-item-renderer id="feed-video">
+            <div id="content">
+              <ytd-rich-grid-media>A real recommended video</ytd-rich-grid-media>
+            </div>
+          </ytd-rich-item-renderer>
+        </ytd-rich-grid-renderer>
       </ytd-watch-flexy>
     </ytd-app>
   </body>

@@ -67,17 +67,20 @@ try {
   await youtube.navigate(origin('www.youtube.com', '/watch?v=smoke'))
   await waitFor(youtube, `document.body.dataset.skipped === 'true'`, 'YouTube skip automation')
   await waitFor(youtube, `window.__adblockContentEvents?.length > 0`, 'YouTube metrics flush')
+  await waitFor(youtube, `getComputedStyle(document.querySelector('#feed-ad')).display === 'none'`, 'YouTube feed ad hidden')
   const youtubeHidden = await countHidden(youtube)
   const youtubeEvents = await contentEvents(youtube)
-  assert(youtubeHidden === 0, `Expected YouTube skip assist to leave page containers visible, saw ${youtubeHidden} hidden nodes`)
-  assert(youtubeEvents >= 1, `Expected YouTube skip assist to report video events, saw ${youtubeEvents}`)
+  const youtubeFeedVideoVisible = await isVisible(youtube, '#feed-video')
+  assert(youtubeHidden >= 3, `Expected YouTube cosmetic filtering to hide feed and display ads, saw ${youtubeHidden} hidden nodes`)
+  assert(youtubeFeedVideoVisible, 'Expected the real YouTube feed video to stay visible')
+  assert(youtubeEvents >= 1, `Expected YouTube protection to report events, saw ${youtubeEvents}`)
   closeView(youtube)
 
   const shorts = openView(900, 700)
   await shorts.navigate(origin('www.youtube.com', '/shorts/smoke'))
   await waitFor(shorts, `document.body.dataset.skipped === 'true'`, 'YouTube Shorts skip automation')
-  const shortsHidden = await countHidden(shorts)
-  assert(shortsHidden === 0, `Expected YouTube Shorts skip assist to leave page containers visible, saw ${shortsHidden} hidden nodes`)
+  const shortsFeedVideoVisible = await isVisible(shorts, '#feed-video')
+  assert(shortsFeedVideoVisible, 'Expected the real YouTube Shorts feed video to stay visible')
   closeView(shorts)
 
   const twitch = openView(900, 700)
@@ -86,7 +89,9 @@ try {
   const twitchHidden = await countHidden(twitch)
   const twitchEvents = await contentEvents(twitch)
   const twitchVideoSeconds = await twitch.evaluate<number>(`window.__adblockContentEvents?.reduce((total, event) => total + (event.videoSecondsSaved ?? 0), 0) ?? 0`)
-  assert(twitchHidden === 0, `Expected Twitch video detection to leave page containers visible, saw ${twitchHidden} hidden nodes`)
+  const twitchMarkerVisible = await isVisible(twitch, '.player-ad-notice')
+  assert(twitchHidden >= 1, `Expected Twitch cosmetic filtering to hide the display banner, saw ${twitchHidden} hidden nodes`)
+  assert(twitchMarkerVisible, 'Expected Twitch video-ad markers to stay visible for detection')
   assert(twitchEvents >= 2, `Expected Twitch video detection to report video events, saw ${twitchEvents}`)
   assert(twitchVideoSeconds >= 15, `Expected Twitch video detection to estimate saved video time, saw ${twitchVideoSeconds}`)
   closeView(twitch)
@@ -147,7 +152,6 @@ try {
   console.log([
     'Bun WebView smoke tested Very Good AdBlock:',
     `youtube=${youtubeHidden}`,
-    `shorts=${shortsHidden}`,
     `twitch=${twitchHidden}`,
     `popup=${todayBlocked}`,
     `dashboard=${dashboardBlocked}`,
@@ -307,10 +311,15 @@ function contentFixture(body: string): string {
 function youtubeFixture(): string {
   return `
     <h1>YouTube fixture</h1>
+    <div id="masthead-ad">masthead ad</div>
     <div class="ytp-ad-module">video ad module</div>
     <div class="video-ads">video ad</div>
     <ytd-display-ad-renderer>display ad</ytd-display-ad-renderer>
     <button class="ytp-ad-skip-button" onclick="document.body.dataset.skipped = 'true'">Skip ad</button>
+    <ytd-rich-grid-renderer>
+      <ytd-rich-item-renderer id="feed-ad"><ytd-ad-slot-renderer>in-feed ad</ytd-ad-slot-renderer></ytd-rich-item-renderer>
+      <ytd-rich-item-renderer id="feed-video"><ytd-rich-grid-media>real recommended video</ytd-rich-grid-media></ytd-rich-item-renderer>
+    </ytd-rich-grid-renderer>
   `
 }
 
@@ -338,6 +347,10 @@ async function waitFor(view: Bun.WebView, expression: string, label: string, tim
 
 async function countHidden(view: Bun.WebView): Promise<number> {
   return view.evaluate<number>(`document.querySelectorAll('[data-adblock-hidden="true"]').length`)
+}
+
+async function isVisible(view: Bun.WebView, selector: string): Promise<boolean> {
+  return view.evaluate<boolean>(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); return Boolean(el) && getComputedStyle(el).display !== 'none' })()`)
 }
 
 async function contentEvents(view: Bun.WebView): Promise<number> {
@@ -419,6 +432,15 @@ function makeDashboardState(): DashboardState {
       rulesetHits: { static_rules: 16 },
       checkedAt: now.toISOString(),
     },
+    cosmetic: {
+      enabled: true,
+      aggressive: false,
+      activeTabHidden: 3,
+      activeTabSelectors: [
+        { selector: 'ytd-ad-slot-renderer', count: 2 },
+        { selector: '#masthead-ad', count: 1 },
+      ],
+    },
     filters: {
       staticRuleCount: 3_932,
       generatedHostRules: 3_912,
@@ -435,6 +457,8 @@ function defaultSmokeSettings(): ExtensionSettings {
   return {
     enabled: true,
     badgeEnabled: true,
+    cosmeticFiltering: true,
+    aggressiveCosmetic: false,
     youtubeEnhancements: true,
     twitchEnhancements: true,
     allowedSites: [],

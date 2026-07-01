@@ -139,7 +139,10 @@ function siteStatsFor(next: DashboardState, hostname: string): DashboardState['l
 function sourceLabel(source: string): string | undefined {
   if (source === 'dnr') return 'Network rules'
   if (source === 'video') return 'Video skips'
-  if (source === 'twitch') return 'Twitch markers'
+  if (source === 'twitch') return 'Twitch banners'
+  if (source === 'youtube') return 'YouTube placements'
+  if (source === 'cosmetic') return 'Hidden placements'
+  if (source === 'x') return 'X promoted'
   if (source === 'manual') return 'Manual rules'
   return undefined
 }

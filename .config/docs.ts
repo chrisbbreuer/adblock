@@ -125,7 +125,7 @@ const config: BunPressOptions = {
           items: [
             { text: 'Blocking Model', link: '/architecture/' },
             { text: 'YouTube and Twitch', link: '/architecture/youtube-x' },
-            { text: 'Deferred Cosmetic Filtering', link: '/architecture/deferred-cosmetic-filtering' },
+            { text: 'Cosmetic Filtering', link: '/architecture/cosmetic-filtering' },
             { text: 'Stats and Cloud Sync', link: '/architecture/stats-sync' },
           ],
         },
