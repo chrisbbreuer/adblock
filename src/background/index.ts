@@ -25,6 +25,7 @@ const filterSources = generatedNetworkHosts.sources.map(source => ({
   hosts: source.hosts,
   sha256: source.sha256,
 }))
+const pageBadgeStats = new Map<number, { blocked: number, url?: string }>()
 
 chrome.runtime.onInstalled.addListener(() => {
   void setup()
@@ -43,6 +44,32 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, sender, sendRespo
     })
 
   return true
+})
+
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  void updateBadge(tabId)
+})
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'loading' || changeInfo.url) {
+    pageBadgeStats.set(tabId, { blocked: 0, url: changeInfo.url ?? tab.url })
+    void updateBadge(tabId)
+  }
+
+  if (changeInfo.status === 'complete') {
+    void updateBadge(tabId)
+  }
+})
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  pageBadgeStats.delete(tabId)
+})
+
+chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
+  const tabId = info.request.tabId
+  if (tabId < 0) return
+  incrementPageBadge(tabId, 1)
+  void updateBadge(tabId)
 })
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -83,7 +110,10 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
     }
     case 'record-blocks': {
       await recordBlockEvents(message.events)
-      await updateBadge(sender.tab?.url)
+      if (sender.tab?.id !== undefined) {
+        incrementPageBadge(sender.tab.id, message.events.reduce((total, event) => total + event.count, 0), sender.tab.url)
+      }
+      await updateBadge(sender.tab?.id)
       return true
     }
     case 'reset-stats':
@@ -178,21 +208,40 @@ async function toggleSite(hostname: string, allowed: boolean): Promise<Extension
   })
 }
 
-async function updateBadge(tabUrl?: string): Promise<void> {
+async function updateBadge(tabId?: number): Promise<void> {
   const settings = await getSettings()
+  tabId ??= (await getActiveTabState(settings))?.tabId
+
   if (!settings.badgeEnabled) {
-    await chrome.action.setBadgeText({ text: '' })
+    await chrome.action.setBadgeText(tabId === undefined ? { text: '' } : { tabId, text: '' })
     return
   }
 
-  const hostname = tabUrl ? hostnameFromUrl(tabUrl) : (await getActiveTabState(settings))?.hostname
+  const activeTab = await getActiveTabState(settings)
+  const tabDetails = tabId === undefined ? undefined : pageBadgeStats.get(tabId)
+  const pageBlocked = tabDetails?.blocked ?? 0
+  const hostname = tabDetails?.url ? hostnameFromUrl(tabDetails.url) : activeTab?.hostname
   const local = await getLocalStats()
   const site = hostname ? local.sites[hostname] : undefined
+  const badgeTarget = tabId === undefined ? {} : { tabId }
 
-  await chrome.action.setBadgeBackgroundColor({ color: '#17c964' })
-  await chrome.action.setBadgeText({ text: site?.adsBlocked ? compactBadge(site.adsBlocked) : '' })
+  await chrome.action.setBadgeBackgroundColor({ ...badgeTarget, color: pageBlocked ? '#17c964' : '#51615c' })
+  await chrome.action.setBadgeText({ ...badgeTarget, text: pageBlocked ? compactBadge(pageBlocked) : '' })
   await chrome.action.setTitle({
-    title: site ? `Very Good AdBlock blocked ${site.adsBlocked} ads and saved about ${formatBytes(site.bytesSaved)} here.` : 'Very Good AdBlock',
+    ...badgeTarget,
+    title: [
+      `Very Good AdBlock blocked ${pageBlocked.toLocaleString()} item${pageBlocked === 1 ? '' : 's'} on this page.`,
+      site ? `${site.adsBlocked.toLocaleString()} total for ${hostname}, about ${formatBytes(site.bytesSaved)} saved.` : undefined,
+    ].filter(Boolean).join(' '),
+  })
+}
+
+function incrementPageBadge(tabId: number, count: number, url?: string): void {
+  if (count <= 0) return
+  const existing = pageBadgeStats.get(tabId)
+  pageBadgeStats.set(tabId, {
+    blocked: (existing?.blocked ?? 0) + count,
+    url: url ?? existing?.url,
   })
 }
 

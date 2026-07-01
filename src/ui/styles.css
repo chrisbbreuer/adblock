@@ -527,20 +527,24 @@ h1 {
 }
 
 .brand-mark::before {
-  inset: 7px;
-  border: 3px solid #06120f;
-  border-radius: 999px;
+  left: 8px;
+  top: 14px;
+  width: 8px;
+  height: 14px;
+  border-right: 4px solid #06120f;
+  border-bottom: 4px solid #06120f;
+  border-radius: 2px;
+  transform: rotate(42deg);
 }
 
 .brand-mark::after {
-  display: block;
-  top: 14px;
-  left: 7px;
-  width: 18px;
-  height: 4px;
+  top: 8px;
+  right: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 999px;
   background: #06120f;
-  transform: rotate(-24deg);
+  box-shadow: -14px 2px 0 rgba(6, 18, 15, 0.72);
 }
 
 .marketing-nav nav {
