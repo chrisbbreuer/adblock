@@ -33,6 +33,15 @@ export function buildManifest(input: ManifestInput): chrome.runtime.ManifestV3 {
         js: ['content.js'],
         run_at: 'document_start',
       },
+      {
+        // Runs in the page's own context to prune promoted tweets out of X's
+        // GraphQL responses before they render. MAIN world is required to patch
+        // the page's `fetch`; it talks to content.js over window.postMessage.
+        matches: ['*://x.com/*', '*://*.x.com/*', '*://twitter.com/*', '*://*.twitter.com/*'],
+        js: ['x-inpage.js'],
+        run_at: 'document_start',
+        world: 'MAIN',
+      },
     ],
     declarative_net_request: {
       rule_resources: [

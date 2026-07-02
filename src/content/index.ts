@@ -1,4 +1,4 @@
-import { twitchVideoAdMarkers, xPromotedLabels } from '../shared/constants'
+import { twitchVideoAdMarkers, xConfigMessageSource, xPromotedLabels, xPruneMessageSource } from '../shared/constants'
 import { activeCosmeticGroups } from '../shared/cosmetic'
 import type { ActiveCosmeticGroup, CosmeticContext } from '../shared/cosmetic'
 import { hostnameFromUrl, siteMatches } from '../shared/domain'
@@ -32,7 +32,28 @@ function boot(): void {
   // (removing the style if the extension is off, the site is allowlisted, or
   // cosmetic filtering is disabled; adding aggressive selectors if enabled).
   injectCosmeticStyle(provisionalGroups())
+
+  // Count promoted tweets the MAIN-world pruner removes at the network layer.
+  // Attached early so stats capture ads pruned before settings finish loading.
+  if (isX()) window.addEventListener('message', onXPruneMessage)
+
   void start()
+}
+
+/**
+ * Stats bridge for the MAIN-world X pruner (`content/x-inpage.ts`). The prune
+ * itself happens there; here we only record the count it reports back.
+ */
+function onXPruneMessage(event: MessageEvent): void {
+  if (event.source !== window) return
+  const data = event.data as { source?: string, count?: unknown } | null
+  if (!data || data.source !== xPruneMessageSource) return
+
+  const count = Number(data.count)
+  if (!Number.isFinite(count) || count <= 0) return
+
+  queueEvent('x', 'other', count)
+  scheduleEventFlush()
 }
 
 async function start(): Promise<void> {
@@ -47,6 +68,10 @@ async function start(): Promise<void> {
   else {
     removeCosmeticStyle()
   }
+
+  // Tell the MAIN-world pruner whether to run, so it honors the global off
+  // switch, the allowlist, and the cosmetic-filtering toggle.
+  if (isX()) window.postMessage({ source: xConfigMessageSource, enabled: cosmeticOn }, location.origin)
 
   if (!settings.enabled || allowed) return
 
@@ -238,11 +263,14 @@ function clickYouTubeSkip(roots: readonly SelectorRoot[]): void {
 }
 
 /**
- * Hide promoted tweets in the X timeline. We cannot use a CSS selector because
- * the only reliable ad marker is the "Ad" / "Promoted" text label — and X reuses
- * its media-container test ids on ordinary tweets, so matching those would hide
- * real posts. Instead we walk each timeline cell, confirm the label, and hide the
- * whole cell (so no empty gap is left) while counting it for stats.
+ * Hide promoted tweets in the X timeline — the DOM fallback behind the MAIN-world
+ * network pruner (`content/x-inpage.ts`). The pruner removes promoted entries
+ * from GraphQL responses so they never render; this catches any stragglers
+ * (e.g. an endpoint the pruner missed, or when it is unavailable). We cannot use
+ * a CSS selector because the only reliable DOM marker is the "Ad" / "Promoted"
+ * label — and X reuses its media-container test ids on ordinary tweets, so
+ * matching those would hide real posts. Instead we walk each timeline cell,
+ * confirm the label, and hide the whole cell while counting it for stats.
  */
 function hideXPromotedTweets(roots: readonly SelectorRoot[]): void {
   for (const root of roots) {

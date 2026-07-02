@@ -65,6 +65,7 @@ async function buildScripts(): Promise<void> {
   await Promise.all([
     buildScript('src/background/index.ts', 'background.js'),
     buildScript('src/content/index.ts', 'content.js'),
+    buildScript('src/content/x-inpage.ts', 'x-inpage.js'),
     buildScript('src/ui/popup.ts', 'popup.js'),
     buildScript('src/ui/options.ts', 'options.js'),
   ])

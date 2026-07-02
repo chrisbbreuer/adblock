@@ -47,6 +47,14 @@ export const xPromotedLabels: ReadonlySet<string> = new Set([
   '프로모션 중', // Korean
 ])
 
+/**
+ * postMessage channel between the isolated content script and the MAIN-world
+ * X pruner. `x-prune` carries a removed-count back for stats; `x-config` carries
+ * the enable flag forward so the pruner respects the global/allowlist switches.
+ */
+export const xPruneMessageSource = 'very-good-adblock:x-prune'
+export const xConfigMessageSource = 'very-good-adblock:x-config'
+
 export const twitchVideoAdMarkers = [
   '.player-ad-notice',
   '.commercial-break-in-progress',
