@@ -1,4 +1,4 @@
-import { twitchVideoAdMarkers, xConfigMessageSource, xPromotedLabels, xPruneMessageSource } from '../shared/constants'
+import { twitchVideoAdMarkers, xConfigMessageSource, xPromotedLabels, xPruneMessageSource, ytConfigMessageSource, ytPruneMessageSource } from '../shared/constants'
 import { activeCosmeticGroups } from '../shared/cosmetic'
 import type { ActiveCosmeticGroup, CosmeticContext } from '../shared/cosmetic'
 import { hostnameFromUrl, siteMatches } from '../shared/domain'
@@ -33,27 +33,34 @@ function boot(): void {
   // cosmetic filtering is disabled; adding aggressive selectors if enabled).
   injectCosmeticStyle(provisionalGroups())
 
-  // Count promoted tweets the MAIN-world pruner removes at the network layer.
-  // Attached early so stats capture ads pruned before settings finish loading.
-  if (isX()) window.addEventListener('message', onXPruneMessage)
+  // Count ads the MAIN-world pruners remove at the network layer. Attached early
+  // so stats capture ads pruned before settings finish loading.
+  if (isX() || isYouTube()) window.addEventListener('message', onPruneMessage)
 
   void start()
 }
 
 /**
- * Stats bridge for the MAIN-world X pruner (`content/x-inpage.ts`). The prune
- * itself happens there; here we only record the count it reports back.
+ * Stats bridge for the MAIN-world pruners (`content/x-inpage.ts`,
+ * `content/yt-inpage.ts`). The pruning itself happens there; here we only record
+ * the counts they report back, attributed to the right source.
  */
-function onXPruneMessage(event: MessageEvent): void {
+function onPruneMessage(event: MessageEvent): void {
   if (event.source !== window) return
   const data = event.data as { source?: string, count?: unknown } | null
-  if (!data || data.source !== xPruneMessageSource) return
+  if (!data) return
 
   const count = Number(data.count)
   if (!Number.isFinite(count) || count <= 0) return
 
-  queueEvent('x', 'other', count)
-  scheduleEventFlush()
+  if (data.source === xPruneMessageSource) {
+    queueEvent('x', 'other', count)
+    scheduleEventFlush()
+  }
+  else if (data.source === ytPruneMessageSource) {
+    queueEvent('video', 'media', count, estimateBytesSaved('media', count), estimateVideoSecondsSaved() * count)
+    scheduleEventFlush()
+  }
 }
 
 async function start(): Promise<void> {
@@ -69,9 +76,13 @@ async function start(): Promise<void> {
     removeCosmeticStyle()
   }
 
-  // Tell the MAIN-world pruner whether to run, so it honors the global off
-  // switch, the allowlist, and the cosmetic-filtering toggle.
+  // Tell the MAIN-world pruners whether to run, so they honor the global off
+  // switch, the allowlist, and the relevant per-feature toggle.
   if (isX()) window.postMessage({ source: xConfigMessageSource, enabled: cosmeticOn }, location.origin)
+  if (isYouTube()) {
+    const youtubeOn = settings.enabled && !allowed && settings.youtubeEnhancements
+    window.postMessage({ source: ytConfigMessageSource, enabled: youtubeOn }, location.origin)
+  }
 
   if (!settings.enabled || allowed) return
 

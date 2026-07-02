@@ -42,6 +42,14 @@ export function buildManifest(input: ManifestInput): chrome.runtime.ManifestV3 {
         run_at: 'document_start',
         world: 'MAIN',
       },
+      {
+        // Prunes ad instructions out of YouTube player responses in the page's
+        // own context, so the player never schedules pre/mid-rolls.
+        matches: ['*://*.youtube.com/*'],
+        js: ['yt-inpage.js'],
+        run_at: 'document_start',
+        world: 'MAIN',
+      },
     ],
     declarative_net_request: {
       rule_resources: [
