@@ -425,6 +425,11 @@ function makeDashboardState(): DashboardState {
       allowed: false,
       blocked: false,
     },
+    activePage: {
+      blocked: 18,
+      network: 11,
+      content: 7,
+    },
     dnr: {
       available: true,
       recentMatchedRules: 16,

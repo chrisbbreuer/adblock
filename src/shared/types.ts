@@ -74,6 +74,7 @@ export interface DashboardState {
   local: LocalStats
   cloudSync: CloudSyncState
   activeTab?: ActiveTabState
+  activePage: ActivePageStats
   dnr: DnrTelemetry
   cosmetic: CosmeticTelemetry
   filters: FilterMetadata
@@ -110,6 +111,19 @@ export interface FilterMetadata {
     hosts: number
     sha256: string
   }>
+}
+
+/**
+ * Live counts for the current tab's *most recent page visit* (reset on
+ * navigation), as opposed to the cumulative per-site totals in `SiteStats`.
+ */
+export interface ActivePageStats {
+  /** network + content, the number surfaced on the toolbar badge. */
+  blocked: number
+  /** declarativeNetRequest matches on this page load. */
+  network: number
+  /** Cosmetic hides + video skips reported by the content script. */
+  content: number
 }
 
 export interface ActiveTabState {

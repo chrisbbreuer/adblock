@@ -17,7 +17,7 @@ import {
   resetStats,
   setSettings,
 } from '../shared/storage'
-import type { CosmeticTelemetry, DashboardState, DnrTelemetry, ExtensionSettings, RuntimeMessage, RuntimeResponse } from '../shared/types'
+import type { ActivePageStats, CosmeticTelemetry, DashboardState, DnrTelemetry, ExtensionSettings, RuntimeMessage, RuntimeResponse } from '../shared/types'
 
 const staticRuleCount = curatedRuleSeeds.length + generatedNetworkHosts.hosts.length
 const filterSources = generatedNetworkHosts.sources.map(source => ({
@@ -26,9 +26,26 @@ const filterSources = generatedNetworkHosts.sources.map(source => ({
   hosts: source.hosts,
   sha256: source.sha256,
 }))
-const pageBadgeStats = new Map<number, { blocked: number, url?: string }>()
+/**
+ * Per-tab counters for the current page visit (reset on navigation).
+ * `content` is fed by the content script (cosmetic hides, video skips);
+ * `network` is the declarativeNetRequest match count for this load, kept live by
+ * the debug listener and reconciled against getMatchedRules. `loadedAt` bounds
+ * the getMatchedRules lookup to the current visit.
+ */
+interface PageVisitState {
+  content: number
+  network: number
+  url?: string
+  loadedAt: number
+}
+
+const pageBadgeStats = new Map<number, PageVisitState>()
 const cosmeticActivity = new Map<number, Map<string, number>>()
 const maxCosmeticSelectors = 24
+const badgeRefreshTabs = new Set<number>()
+const badgeRefreshDelayMs = 400
+let badgeRefreshTimer: ReturnType<typeof setTimeout> | undefined
 
 chrome.runtime.onInstalled.addListener(() => {
   void setup()
@@ -55,7 +72,7 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'loading' || changeInfo.url) {
-    pageBadgeStats.set(tabId, { blocked: 0, url: changeInfo.url ?? tab.url })
+    pageBadgeStats.set(tabId, { content: 0, network: 0, url: changeInfo.url ?? tab.url, loadedAt: Date.now() })
     cosmeticActivity.delete(tabId)
     void updateBadge(tabId)
   }
@@ -70,11 +87,15 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   cosmeticActivity.delete(tabId)
 })
 
+// Live network-block feedback. Only fires for unpacked/dev installs; packed
+// installs rely on getMatchedRules in refreshTabNetworkCount instead. Increments
+// are reconciled (via Math.max) against getMatchedRules so the two never sum.
 chrome.declarativeNetRequest.onRuleMatchedDebug?.addListener((info) => {
   const tabId = info.request.tabId
   if (tabId < 0) return
-  incrementPageBadge(tabId, 1)
-  void updateBadge(tabId)
+  const details = pageBadgeStats.get(tabId)
+  if (details) details.network += 1
+  scheduleBadgeRefresh(tabId)
 })
 
 chrome.alarms?.onAlarm.addListener((alarm) => {
@@ -153,7 +174,7 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
     case 'record-blocks': {
       await recordBlockEvents(message.events)
       if (sender.tab?.id !== undefined) {
-        incrementPageBadge(sender.tab.id, message.events.reduce((total, event) => total + event.count, 0), sender.tab.url)
+        incrementPageContent(sender.tab.id, message.events.reduce((total, event) => total + event.count, 0), sender.tab.url)
       }
       await updateBadge(sender.tab?.id)
       return true
@@ -178,6 +199,8 @@ async function getDashboard(): Promise<DashboardState> {
   const activeTab = await getActiveTabState(settings)
   const cloudStats = await getCloudStatsSnapshot()
 
+  if (activeTab?.tabId !== undefined) await refreshTabNetworkCount(activeTab.tabId)
+
   return {
     settings,
     lifetime: await getLifetimeStats(),
@@ -189,6 +212,7 @@ async function getDashboard(): Promise<DashboardState> {
       siteRollups: cloudStats?.sites.length ?? 0,
     },
     activeTab,
+    activePage: pageVisitStats(activeTab?.tabId),
     dnr: await getDnrTelemetry(activeTab?.tabId),
     cosmetic: getCosmeticTelemetry(settings, activeTab?.tabId),
     filters: {
@@ -257,16 +281,17 @@ async function toggleSite(hostname: string, allowed: boolean): Promise<Extension
 
 async function updateBadge(tabId?: number): Promise<void> {
   const settings = await getSettings()
-  tabId ??= (await getActiveTabState(settings))?.tabId
+  const activeTab = await getActiveTabState(settings)
+  tabId ??= activeTab?.tabId
 
   if (!settings.badgeEnabled) {
     await chrome.action.setBadgeText(tabId === undefined ? { text: '' } : { tabId, text: '' })
     return
   }
 
-  const activeTab = await getActiveTabState(settings)
+  if (tabId !== undefined) await refreshTabNetworkCount(tabId)
   const tabDetails = tabId === undefined ? undefined : pageBadgeStats.get(tabId)
-  const pageBlocked = tabDetails?.blocked ?? 0
+  const pageBlocked = pageVisitStats(tabId).blocked
   const hostname = tabDetails?.url ? hostnameFromUrl(tabDetails.url) : activeTab?.hostname
   const local = await getLocalStats()
   const site = hostname ? local.sites[hostname] : undefined
@@ -308,13 +333,54 @@ function getCosmeticTelemetry(settings: ExtensionSettings, activeTabId?: number)
   }
 }
 
-function incrementPageBadge(tabId: number, count: number, url?: string): void {
+function incrementPageContent(tabId: number, count: number, url?: string): void {
   if (count <= 0) return
   const existing = pageBadgeStats.get(tabId)
   pageBadgeStats.set(tabId, {
-    blocked: (existing?.blocked ?? 0) + count,
+    content: (existing?.content ?? 0) + count,
+    network: existing?.network ?? 0,
     url: url ?? existing?.url,
+    loadedAt: existing?.loadedAt ?? Date.now(),
   })
+}
+
+/**
+ * Pull the authoritative network-block count for this page visit from
+ * getMatchedRules (works for packed installs, unlike onRuleMatchedDebug) and
+ * fold it into the live counter. Math.max keeps whichever source is ahead, so
+ * debug increments and matched-rule reads never double-count.
+ */
+async function refreshTabNetworkCount(tabId: number): Promise<void> {
+  const details = pageBadgeStats.get(tabId)
+  if (!details) return
+
+  try {
+    const matched = await chrome.declarativeNetRequest.getMatchedRules({ tabId, minTimeStamp: details.loadedAt })
+    details.network = Math.max(details.network, matched.rulesMatchedInfo.length)
+  }
+  catch {
+    // getMatchedRules can throw without the feedback permission or when quota is
+    // exceeded; keep the live counter so the badge still reflects what we have.
+  }
+}
+
+function pageVisitStats(tabId?: number): ActivePageStats {
+  const details = tabId === undefined ? undefined : pageBadgeStats.get(tabId)
+  const network = details?.network ?? 0
+  const content = details?.content ?? 0
+  return { blocked: network + content, network, content }
+}
+
+/** Coalesce the frequent debug-listener updates into one badge refresh. */
+function scheduleBadgeRefresh(tabId: number): void {
+  badgeRefreshTabs.add(tabId)
+  if (badgeRefreshTimer) return
+  badgeRefreshTimer = setTimeout(() => {
+    badgeRefreshTimer = undefined
+    const tabs = [...badgeRefreshTabs]
+    badgeRefreshTabs.clear()
+    for (const id of tabs) void updateBadge(id)
+  }, badgeRefreshDelayMs)
 }
 
 function compactBadge(value: number): string {
