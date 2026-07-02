@@ -46,6 +46,11 @@ const maxCosmeticSelectors = 24
 const badgeRefreshTabs = new Set<number>()
 const badgeRefreshDelayMs = 400
 let badgeRefreshTimer: ReturnType<typeof setTimeout> | undefined
+const badgePollIntervalMs = 2_000
+const badgePollMaxTicks = 8
+let badgePollTimer: ReturnType<typeof setTimeout> | undefined
+let badgePollTabId: number | undefined
+let badgePollTicksLeft = 0
 
 chrome.runtime.onInstalled.addListener(() => {
   void setup()
@@ -68,6 +73,7 @@ chrome.runtime.onMessage.addListener((message: RuntimeMessage, sender, sendRespo
 
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   void updateBadge(tabId)
+  startBadgePolling(tabId)
 })
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
@@ -79,12 +85,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
   if (changeInfo.status === 'complete') {
     void updateBadge(tabId)
+    startBadgePolling(tabId)
   }
 })
 
 chrome.tabs.onRemoved.addListener((tabId) => {
   pageBadgeStats.delete(tabId)
   cosmeticActivity.delete(tabId)
+  if (badgePollTabId === tabId) badgePollTabId = undefined
 })
 
 // Live network-block feedback. Only fires for unpacked/dev installs; packed
@@ -381,6 +389,38 @@ function scheduleBadgeRefresh(tabId: number): void {
     badgeRefreshTabs.clear()
     for (const id of tabs) void updateBadge(id)
   }, badgeRefreshDelayMs)
+}
+
+/**
+ * Poll the active tab's network-block count for a bounded window after a load or
+ * tab switch. onRuleMatchedDebug does not fire for packed installs, so without
+ * this the badge would only move on tab/content events; polling getMatchedRules
+ * a few times catches ads that finish loading shortly after the page does. The
+ * tick budget is bounded so this never keeps the service worker awake for long.
+ */
+function startBadgePolling(tabId: number): void {
+  badgePollTabId = tabId
+  badgePollTicksLeft = badgePollMaxTicks
+  if (badgePollTimer) return
+  scheduleBadgePoll()
+}
+
+function scheduleBadgePoll(): void {
+  badgePollTimer = setTimeout(async () => {
+    badgePollTimer = undefined
+    const tabId = badgePollTabId
+    if (tabId === undefined || badgePollTicksLeft <= 0) return
+
+    badgePollTicksLeft -= 1
+    try {
+      await updateBadge(tabId)
+    }
+    catch {
+      return // Tab likely closed; stop chasing it.
+    }
+
+    if (badgePollTicksLeft > 0) scheduleBadgePoll()
+  }, badgePollIntervalMs)
 }
 
 function compactBadge(value: number): string {
