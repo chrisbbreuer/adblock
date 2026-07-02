@@ -85,22 +85,32 @@ export const youtubeCosmetic: CosmeticGroup = {
 }
 
 /**
- * Twitch display/banner ads. Video-ad markers (`.player-ad-notice`,
- * `.commercial-break-in-progress`, countdown/label) are deliberately NOT hidden
- * here: the ad is the live stream itself, so hiding the notice would only hide
- * feedback while the ad keeps playing. Those markers are detected for stats
- * instead (see the content script).
+ * Twitch ad affordances. Twitch now delivers video ads via server-side stitching
+ * (SSAI), so there is very little first-party cosmetic ad markup left — the old
+ * `.stream-display-ad__container` / `sad-overlay` / `video-ad-banner` selectors
+ * are gone from the maintained filter lists and were dropped here.
+ *
+ * The in-stream ad IS the live stream, so its markers (`[data-a-target="video-ad-
+ * label"]`, countdown, `.commercial-break-in-progress`) are deliberately NOT
+ * hidden — hiding them would only remove feedback while the ad keeps playing.
+ * They are detected for stats instead (see the content script). What remains
+ * safe to hide are the ad-only affordances and the anti-adblock nag overlay.
  */
 export const twitchCosmetic: CosmeticGroup = {
   source: 'twitch',
   category: 'image',
   default: [
-    '.stream-display-ad__container',
-    '[data-test-selector="sad-overlay"]',
+    // Ad-only buttons rendered beside display and stitched video ads.
+    'button[aria-label="Leave feedback for this Ad"]',
+    'button[aria-label="Learn more about this ad"]',
+    // Anti-adblock nag overlay ("allow ads in your browser" / Turbo upsell).
+    '.video-player__overlay .player-overlay-background:has(a[href*="how-to-allow-ads-browser"])',
+    '.video-player__overlay .player-overlay-background:has(a[href="https://www.twitch.tv/turbo"])',
   ],
   aggressive: [
-    '[data-a-target="video-ad-banner"]',
-    '[data-test-selector="video-ad-banner"]',
+    // The dark scrim Twitch lays over the stream during a stitched commercial
+    // break. Opt-in: the darkness overlay classes are reused by other states.
+    '.video-player__overlay .player-overlay-background--darkness-3',
   ],
 }
 

@@ -51,7 +51,7 @@ describe('cached Twitch content script fixture', () => {
     try {
       await view.navigate(`https://www.twitch.tv:${server.port}/streamer`)
       await waitFor(view, `(window.__adblockEvents?.length ?? 0) > 0`, 'batched event flush')
-      await waitFor(view, `getComputedStyle(document.querySelector('.stream-display-ad__container')).display === 'none'`, 'display ad hidden')
+      await waitFor(view, `getComputedStyle(document.querySelector('button[aria-label="Leave feedback for this Ad"]')).display === 'none'`, 'ad feedback button hidden')
 
       const hiddenCount = await view.evaluate<number>(`document.querySelectorAll('[data-adblock-hidden="true"]').length`)
       const events = await view.evaluate<BlockEvent[]>(`window.__adblockEvents ?? []`)
@@ -61,8 +61,14 @@ describe('cached Twitch content script fixture', () => {
       const isHidden = (selector: string): Promise<boolean | null> =>
         view.evaluate<boolean | null>(`(() => { const el = document.querySelector(${JSON.stringify(selector)}); return el ? getComputedStyle(el).display === 'none' : null })()`)
 
-      // The display banner ad is hidden.
-      expect(await isHidden('.stream-display-ad__container')).toBe(true)
+      // Ad-only affordances are hidden: the feedback button and the anti-adblock
+      // "disable your ad blocker" nag overlay.
+      expect(await isHidden('button[aria-label="Leave feedback for this Ad"]')).toBe(true)
+      expect(await isHidden('.player-overlay-background')).toBe(true)
+
+      // The legacy display-ad container is no longer targeted (Twitch dropped it),
+      // so we must not hide it — proves the modernized selectors don't over-reach.
+      expect(await isHidden('.stream-display-ad__container')).toBe(false)
 
       // Video-ad markers stay visible — the ad IS the stream, so we only detect them.
       expect(await isHidden('.player-ad-notice')).toBe(false)
@@ -115,8 +121,13 @@ function twitchFixture(): string {
         <div class="commercial-break-in-progress">Ad 1 of 2</div>
         <div data-a-target="video-ad-label">Advertisement</div>
         <div data-a-target="video-ad-countdown">0:24</div>
-        <div data-a-target="video-player-ad-overlay">video overlay ad</div>
-        <div class="stream-display-ad__container">display ad</div>
+        <button aria-label="Leave feedback for this Ad">Feedback</button>
+        <div class="video-player__overlay">
+          <div class="player-overlay-background">
+            <a href="/how-to-allow-ads-browser">Disable your ad blocker to keep watching</a>
+          </div>
+        </div>
+        <div class="stream-display-ad__container">legacy display ad slot</div>
       </div>
     </main>
   </body>
