@@ -39,14 +39,17 @@ deferral asked for.
   elements (`ytd-ad-slot-renderer`, `ytd-display-ad-renderer`, `#masthead-ad`),
   not broad `[class*="ad"]` matches. Real videos, comments, Shorts, and
   recommendations are never targeted.
-- **X promoted tweets are matched by label, not test id.** X reuses its media
-  container (`[data-testid="placementTracking"]`) on ordinary tweets, so hiding
-  that test id would remove real photos and videos. Promoted tweets are instead
-  detected in the content script by their standalone "Ad"/"Promoted" label,
-  matched against a set of locale strings (see `xPromotedLabels` in
-  `constants.ts`), and the whole timeline cell is hidden. Only translations
-  verified against a real source are included — unverified ones are omitted so a
-  wrong string can never hide a genuine post.
+- **X promoted tweets are pruned at the source.** A MAIN-world content script
+  (`content/x-inpage.ts`) wraps `fetch` and removes entries carrying
+  `content.itemContent.promotedMetadata` from X's GraphQL timeline responses
+  before the app renders them — the same source-level approach uBlock Origin
+  uses. It is locale-independent, leaves no flash, and never guesses at DOM
+  nodes. It talks to the isolated content script over `window.postMessage`: it
+  receives an enable flag (honoring the off switch and allowlist) and reports how
+  many ads it removed for stats. A DOM label check (`xPromotedLabels` in
+  `constants.ts`) stays as a fallback for stragglers — matched only against
+  standalone label spans, never the `[data-testid="placementTracking"]` media
+  container X reuses on ordinary tweets.
 - **Never the player.** Instream video ads are handled by skip automation.
   Player-region containers (`.video-ads`, `.ytp-ad-module`) are intentionally
   not hidden, so hiding an ad can never hide the skip control or the video.
@@ -83,8 +86,11 @@ which keeps the selector policy testable without a browser.
 - `test/twitch-content.test.ts` asserts the ad-only feedback button and the
   anti-adblock nag overlay are hidden, the dropped legacy display-ad container is
   left visible, and the in-stream video-ad markers stay visible for detection.
-- `test/x-content.test.ts` asserts a promoted tweet cell is hidden while an
-  ordinary tweet's photo and video (in the same `placementTracking` container)
-  stay visible.
+- `test/x-content.test.ts` asserts a promoted tweet cell is hidden by the DOM
+  fallback while an ordinary tweet's photo and video (in the same
+  `placementTracking` container) stay visible.
+- `test/x-prune.test.ts` asserts the GraphQL pruner removes promoted entries
+  (by `promotedMetadata` and `promoted-` ids, including promoted module items)
+  while leaving organic entries and unrelated `entries` arrays untouched.
 - `scripts/smoke-extension.ts` screenshots the built extension against YouTube,
   Twitch, popup, options, and marketing surfaces.

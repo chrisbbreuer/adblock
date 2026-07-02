@@ -8,3 +8,10 @@ Sources currently include pinned files from:
 
 - EasyList, GPL-3.0-or-later, <https://github.com/easylist/easylist>
 - AdGuard Filters, GPL-3.0-or-later, <https://github.com/AdguardTeam/AdguardFilters>
+
+## Technique credits
+
+The X / Twitter promoted-tweet pruner removes entries carrying
+`content.itemContent.promotedMetadata` from GraphQL timeline responses. This
+source-level approach is the one used by uBlock Origin (<https://github.com/uBlockOrigin/uAssets>);
+the implementation here is original — no uBlock code is included.
