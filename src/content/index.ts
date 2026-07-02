@@ -1,4 +1,4 @@
-import { twitchVideoAdMarkers } from '../shared/constants'
+import { twitchVideoAdMarkers, xPromotedLabels } from '../shared/constants'
 import { activeCosmeticGroups } from '../shared/cosmetic'
 import type { ActiveCosmeticGroup, CosmeticContext } from '../shared/cosmetic'
 import { hostnameFromUrl, siteMatches } from '../shared/domain'
@@ -236,9 +236,6 @@ function clickYouTubeSkip(roots: readonly SelectorRoot[]): void {
     }
   }
 }
-
-/** Standalone labels X renders on promoted timeline tweets. */
-const xPromotedLabels = new Set(['Ad', 'Promoted', 'Promoted Tweet'])
 
 /**
  * Hide promoted tweets in the X timeline. We cannot use a CSS selector because

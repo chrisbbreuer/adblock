@@ -19,6 +19,34 @@ export const protectedHosts = {
   x: ['x.com', 'www.x.com', 'twitter.com', 'www.twitter.com'],
 } as const
 
+/**
+ * Standalone text labels X renders on promoted timeline tweets, across locales.
+ * The content script matches a tweet's leaf label span exactly against this set,
+ * so promoted tweets are caught regardless of the viewer's interface language
+ * without hiding ordinary posts. Kept as a flat set for O(1) exact lookups.
+ *
+ * English "Ad"/"Promoted" plus the localized strings verified against a real
+ * source (ryanckulp/twitter_ad_blocker's PROMOTED_LABELS). Only confirmed
+ * strings are listed — unverified translations are deliberately omitted rather
+ * than guessed, since a wrong entry could hide a genuine post.
+ */
+export const xPromotedLabels: ReadonlySet<string> = new Set([
+  'Ad', // English (current short label)
+  'Promoted', // English
+  'Promoted Tweet', // English (legacy)
+  'Gesponsert', // German
+  'Promocionado', // Spanish
+  'Sponsorisé', // French
+  'Sponsorizzato', // Italian
+  'Promowane', // Polish
+  'Sponsrad', // Swedish
+  'Sponzorováno', // Czech
+  'Реклама', // Ukrainian / Russian
+  'プロモーション', // Japanese
+  'プロモツイート', // Japanese ('Promoted Tweet')
+  '프로모션 중', // Korean
+])
+
 export const twitchVideoAdMarkers = [
   '.player-ad-notice',
   '.commercial-break-in-progress',
